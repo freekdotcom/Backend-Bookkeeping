@@ -4,7 +4,7 @@
 	"author": "H.J.M Van der Heijden",
 	"scripts": {
 		"start": "node main.js",
-		"test": "mocha && ./node_modules/jshint/bin/jshint main.js"
+		"test": "mocha && ./node_modules/jshint/bin/jshint *.js"
 	},
 	"devDependencies": {
 		"mocha": "^3.0.0",

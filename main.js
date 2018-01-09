@@ -6,9 +6,10 @@
    
   
 
-   app.get("/foo/:id", (req,res) => {
+   app.get("/:test/:id", (req,res) => {
 	res.end(JSON.stringify({
-	  hello:req.params.id
+	  hello:req.params.id,
+	  foo:req.params.test
 	}))
  
    })

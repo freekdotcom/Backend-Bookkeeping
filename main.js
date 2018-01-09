@@ -4,7 +4,7 @@
    	 app = express(),
 	 log4js = require('log4js')
    
-  
+   console.log("hello world")  
 
    app.get("/:test/:id", (req,res) => {
 	res.end(JSON.stringify({

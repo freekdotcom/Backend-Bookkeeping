@@ -4,10 +4,11 @@
 	"author": "H.J.M Van der Heijden",
 	"scripts": {
 		"start": "node main.js",
-		"test":"mocha"
+		"test": "mocha && ./node_modules/jshint/bin/jshint main.js"
 	},
 	"devDependencies": {
-		"mocha": "^3.0.0"
+		"mocha": "^3.0.0",
+		"jshint": "^2.9.5"
 	},
 	"dependencies": {
 		"express": "^4.0",

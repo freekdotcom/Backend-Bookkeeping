@@ -4,14 +4,15 @@
 	"author": "H.J.M Van der Heijden",
 	"scripts": {
 		"start": "node main.js",
-		"test": "mocha && ./node_modules/jshint/bin/jshint *.js"
+		"test": "mocha &&  ./node_modules/eslint/bin/eslint.js  *.js"
 	},
 	"devDependencies": {
-		"mocha": "^3.0.0",
-		"jshint": "^2.9.5"
+		"eslint": "^4.1.1",
+		"eslint-config-google": "^0.9.1",
+		"mocha": "^3.0.0"
 	},
 	"dependencies": {
 		"express": "^4.0",
-		"log4js": "^2.4.1"
+		"winston": "^2.4.0"
 	}
 }

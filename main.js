@@ -1,24 +1,22 @@
-;(()=>{
-   "use strict"
-   const express = require('express'),
-   	 app = express(),
-	 log4js = require('log4js')
+(()=> {
+    "use strict";
+    const express = require("express");
+    const app = express();
+    const winston = require("winston");
+
+
+
+
+
    
-   console.log("hello world")  
-
-   app.get("/:test/:id", (req,res) => {
-	res.end(JSON.stringify({
-	  hello:req.params.id,
-	  foo:req.params.test
-	}))
+    app.get("/:test/:id", (req,res) => {
+        res.end(JSON.stringify({
+            hello:req.params.id,
+            foo:req.params.test
+        }));
+    });
+    app.listen(8080, () => {
+        winston.log("info","listening");
+    });
  
-   })
-
-   const server = app.listen(8080, () => {
-     console.log("listening")
-
-   })
-
-   console.log("tesT")
-
-})()
+})();

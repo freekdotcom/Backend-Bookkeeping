@@ -4,7 +4,7 @@
 	"author": "H.J.M Van der Heijden",
 	"scripts": {
 		"start": "node main.js",
-		"test": "mocha &&  ./node_modules/eslint/bin/eslint.js  ./*.js"
+		"test": "mocha &&  ./node_modules/eslint/bin/eslint.js -c ./.eslintrc.js  ./*.js"
 	},
 	"devDependencies": {
 		"eslint": "^4.15.1",

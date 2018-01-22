@@ -1,9 +1,10 @@
-var assert = require('assert');
-describe('Array', function() {
-  describe('#indexOf()', function() {
-    it('should return -1 when the value is not present', function() {
-      assert.equal([1,2,3].indexOf(4), -1);
+(() => {
+  'use strict';
+  const assert = require('assert');
+  const myHello = require('../app/foo');
+  describe('Test', function() {
+    it('should say hello before something', function() {
+      assert.equal(myHello.hello('test'), 'hello test');
     });
   });
-});
-
+})();

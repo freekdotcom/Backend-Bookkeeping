@@ -1,7 +1,7 @@
 {
-    "name": "examplejs",
+    "name": "Backend-Bookkeeping",
     "version": "42.0.0",
-    "author": "H.J.M Van der Heijden",
+    "author": "F.P. van der Meulen",
     "scripts": {
         "start": "node ./app/main.js",
         "test": "npm run mocha & npm run eslint",

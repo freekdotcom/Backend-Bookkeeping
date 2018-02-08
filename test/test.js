@@ -3,24 +3,32 @@
   const assert = require('assert');
   const myHello = require('../app/foo');
   const rest = require('../app/rest');
-  const jsonUsers = require('../app/users.json')
+  var jsonUsers = require('../app/users.json')
 
-
-  /*describe('Test', function() {
+  /**
+   * @param  {[type]}
+   * @return {[type]}
+   */
+  describe('Test', function() {
     it('should say hello before something', function() {
       assert.equal(myHello.hello('test'), 'hello test');
     });
-  }); */
+  }); 
 
-  describe('Get', function(){
-  	it('should retrieve the correct user based on the id', function(){
+/**
+ * A test to check if it's possible to retrieve an user from the JSON
+ */
+  describe('Get', function() {
+  	it('should successfully retrieve the correct user based on the id', function(){
   		var outputTest = rest.getResponse(0);
-  		assert.equal(jsonUsers[0], outputTest);
+  		assert.equal(jsonUsers.Users[0], outputTest);
   	});
   });
 
+  /*describe('Post', function(){
+  	it('should add another user to the JSON successfully', function(){
 
-
-
+  	})
+  }) */
 
 })();

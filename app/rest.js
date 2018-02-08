@@ -51,7 +51,6 @@
 
 	}
 
-	  module.exports = {getResponse};
-	  module.exports = {postResponse}
+	  module.exports = {getResponse, postResponse};
 
 })();

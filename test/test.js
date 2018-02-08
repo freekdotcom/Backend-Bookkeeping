@@ -16,7 +16,7 @@
   	it('should retrieve the correct user based on the id', function(){
   		var outputTest = rest.getResponse(0);
   		assert.equal(jsonUsers[0], outputTest);
-  	})
+  	});
   });
 
 

@@ -14,11 +14,12 @@
 
   describe('Get', function(){
   	it('should retrieve the correct user based on the id', function(){
-  		assert.equal(jsonUsers[0], rest.getResponse(0));
+  		var outputTest = rest.getResponse(0);
+  		assert.equal(jsonUsers[0], outputTest);
   	})
   });
 
-  
+
 
 
 

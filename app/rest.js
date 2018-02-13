@@ -8,12 +8,14 @@
   * @return {string} the user thing
   */
   function getResponse(id) {
-    for (const i in jsonUsers.Users) {
-      if (i == id) {
-        return jsonUsers.Users[i];
+    let jsonUser;
+    jsonUsers.Users.forEach(function(user) {
+      if (user.id == id) {
+        jsonUser = user;
       }
-    }
-    return 'Error: The User does not exist.';
+    });
+
+    return jsonUser;
   }
 
   /**
@@ -23,11 +25,12 @@
   * @return {string} - Returns the updated JSON with the users
   */
   function postResponse(id, name, age) {
-    for (const i in jsonUsers.Users) {
-      if (i == id) {
-        return 'The user already exists.';
+    jsonUsers.Users.forEach(function(user) {
+      if (user.id == id) {
+        return 'The user already exists';
       }
-    }
+    });
+
     jsonUsers.Users.push({'id': id, 'name': name, 'age': age});
     return jsonUsers.Users;
   }
@@ -37,7 +40,13 @@
   * @return {string} The Json with the updated data
   */
   function putResponse(id) {
-    return jsonUsers.Users[id];
+    let jsonUser;
+    jsonUsers.Users.forEach(function(user) {
+      if (user.id == id) {
+        jsonUser = user;
+      }
+    });
+    return jsonUser;
   }
 
   /**

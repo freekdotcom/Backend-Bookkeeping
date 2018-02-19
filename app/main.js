@@ -4,6 +4,7 @@
   const app = express();
   const winston = require('winston');
   const rest = require('./rest');
+  const database = require('./database/database');
 
   /**
   * @param  {[type]}
@@ -46,5 +47,6 @@
   */
   app.listen(8080, () => {
     winston.log('info', 'listening');
+    database.testDatabase();
   });
 })();

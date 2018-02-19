@@ -23,4 +23,5 @@
       assert.equal(jsonUsers.Users[0], outputTest);
     });
   });
+
 })();

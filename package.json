@@ -6,16 +6,18 @@
         "start": "node ./app/main.js",
         "test": "npm run mocha & npm run eslint",
         "mocha": "./node_modules/mocha/bin/mocha",
-        "eslint": "./node_modules/eslint/bin/eslint.js -c ./.eslintrc.js ./test/*.js  ./app/*.js"
+        "eslint": "./node_modules/eslint/bin/eslint.js -c ./.eslintrc.js ./test/*.js  ./app/*.js ./app/database/*.js"
     },
     "devDependencies": {
-        "eslint": "^4.15.1",
+        "eslint": "^4.18.0",
         "eslint-config-google": "^0.9.1",
         "eslint-plugin-security": "^1.4.0",
         "mocha": "^3.0.0"
     },
     "dependencies": {
         "express": "^4.0",
+        "pg": "^7.4.1",
+        "pg-promise": "^7.5.3",
         "winston": "^2.4.0"
     }
 }

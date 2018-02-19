@@ -10,6 +10,9 @@ const initOptions = {
 const pgp = require('pg-promise')(initOptions);
 const db = pgp('postgres://CERNTester:frederick01@CERNTester:5432/log_entry');
 
+/**
+ * [testDatabase description]
+ */
 function testDatabase() {
   db.one('SELECT $1 AS value', 123)
     .then(function(data) {

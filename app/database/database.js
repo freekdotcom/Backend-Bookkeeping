@@ -1,26 +1,20 @@
-const initOptions = {
-  error: (error, e) => {
-    if (e.cn) {
-      console.log('CN:', e.cn);
-      console.log('EVENT:', error.message || error);
-    }
-  }
-};
-
-const pgp = require('pg-promise')(initOptions);
-const db = pgp('postgres://CERNTester:frederick01@CERNTester:5432/log_entry');
+const pg = require('pg');
+const conString = 'postgres://cernfrederick:frederick01@localhost:5432/cernfrederick';
+const winston = require('winston');
+const results = [];
 
 /**
- * [testDatabase description]
+ * [getSomething description] testing the database function
+ *
  */
-function testDatabase() {
-  db.one('SELECT $1 AS value', 123)
-    .then(function(data) {
-      console.log('DATA:', data.value);
-    })
-    .catch(function(error) {
-      console.log('ERROR:', error);
-    });
+function getSomething() {
+  const client = new pg.Client(conString);
+  client.connect();
+  const query = client.query('SELECT * FROM log_entry');
+  query.on('row', (row) => {
+    results.push(row);
+    winston.log('info', row);
+  });
 }
 
-module.exports = {testDatabase};
+module.exports = {getSomething};

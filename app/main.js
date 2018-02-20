@@ -47,6 +47,6 @@
   */
   app.listen(8080, () => {
     winston.log('info', 'listening');
-    database.testDatabase();
+    winston.log('data: ', database.getSomething());
   });
 })();

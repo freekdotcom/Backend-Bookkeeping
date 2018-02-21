@@ -19,7 +19,7 @@
         "express": "^4.0",
         "mariasql": "^0.2.6",
         "pg": "^7.4.1",
-        "pg-promise": "^7.5.3",
+        "pg-promise": "^7.5.4",
         "winston": "^2.4.0"
     }
 }

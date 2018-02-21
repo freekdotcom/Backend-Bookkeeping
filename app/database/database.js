@@ -4,17 +4,22 @@ const winston = require('winston');
 const results = [];
 
 /**
- * [getSomething description] testing the database function
- *
+ * [getInformationFromDatabase description] testing the database function
+ * @return {array} All the results from the database.
  */
-function getSomething() {
+function getInformationFromDatabase() {
   const client = new pg.Client(conString);
   client.connect();
   const query = client.query('SELECT * FROM log_entry');
+
   query.on('row', (row) => {
     results.push(row);
-    winston.log('info', row);
   });
-}
 
-module.exports = {getSomething};
+  query.on('end', () => {
+    client.end();
+    winston.log(results);
+  });
+  return results;
+}
+module.exports = {getInformationFromDatabase};

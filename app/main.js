@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  const bodyParser = require('body-parser').json();
   const express = require('express');
   const app = express();
   const winston = require('winston');
@@ -11,10 +12,10 @@
   * @param  {[type]}
   * @return {[type]}
   */
-  app.get('/:id', (req, res) => {
-    res.end(JSON.stringify({
-      user: rest.getResponse(req.params.id)
-    }));
+  app.get('/log/entries', bodyParser, (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const JSONResult = database.getInformationFromDatabase();
+    res.send(JSONResult);
   });
 
   /**
@@ -47,6 +48,5 @@
   */
   app.listen(8080, () => {
     winston.log('info', 'listening');
-    winston.log('data: ', database.getSomething());
   });
 })();

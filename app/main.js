@@ -5,6 +5,7 @@
   const app = express();
   const winston = require('winston');
   const rest = require('./rest');
+  const asyncHandler = require('express-async-handler');
   const database = require('./database/database');
 
   /**
@@ -12,12 +13,12 @@
   * @param  {[type]}
   * @return {[type]}
   */
-  app.get('/log/entries', bodyParser, async (req, res) =>{
+  app.get('/log/entries', bodyParser, asyncHandler(async (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     const JSONResult = await database.GetAllLogEntries();
     console.log(JSONResult);
     res.send(JSONResult);
-  });
+  }));
 
   /**
    * Gets a single log entry.
@@ -26,25 +27,24 @@
    * @param  {[type]} async            (req,         res [description]
    * @return {[type]}                  [description]
    */
-  app.get('/log/entry/:id', bodyParser, async (req, res) =>{
+  app.get('/log/entry/:id', bodyParser, asyncHandler(async (req, res) =>{
     res.setHeader('Content-Type', 'application/json');
     const JSONResult = await database.GetSingleLogEntry(req.params.id);
     res.send(JSONResult);
-  });
+  }));
 
   /**
   * @param  {[type]}
   * @param  {[type]}
   * @return {[type]}
   */
-  app.post('/log/entries', bodyParser, async (req, res) => {
+  app.post('/log/entries', bodyParser, asyncHandler(async (req, res, next) => {
     const JSONResult = await database.PostLogEntry(req.body.bunches, 
-      req.body.scheme, req.body.fill, req.body.energyPerBeam, 
-      req.body.intensityPerBeam);
+    req.body.scheme, req.body.fill, req.body.energy_per_beam, 
+    req.body.intensityPerBeam);
     res.setHeader('Content-Type', 'application/json');
-
     res.send(JSONResult);
-  });
+  }));
 
   /**
   * @param  {[type]}

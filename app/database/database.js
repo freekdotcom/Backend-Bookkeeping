@@ -57,17 +57,17 @@ function GetSingleLogEntry(runID) {
 
  */
 function PostLogEntry(bunches, scheme, fill, energyPerBeam, intensityPerBeam) {
-  let results = null;
+  const results = [];
   const client = new pg.Client(conString);
   client.connect();
   let query = null;
   return new Promise(resolve => {
     // filling in the req params
     client.query('INSERT INTO log_entry(bunches, scheme, fill,' +
-      'energy_per_beam, intensity_per_beam) values ($1, $2, $3, $4, $5)'
+      'energy_per_beam, intensity_per_beam) values ($1, $2, $3, $4, $5)',
         [bunches, scheme, fill, energyPerBeam, intensityPerBeam]);
     // proof that it succeeded.
-    query = client.query('SELECT * FROM log_entry ORDER BY run_id ASC');
+    query = client.query('SELECT * FROM log_entry');
     query.on('row', (row) => {
       results.push(row);
     });

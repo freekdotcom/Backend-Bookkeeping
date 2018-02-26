@@ -1,3 +1,10 @@
+/* Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
+*
+* This software is distributed under the therms of the
+* GNU General Public Licence version 3 (GPL) version 3,
+* copied verbatim in the file "LICENSE"
+*
+*/
 const pg = require('pg');
 const conString = 'postgres://cernfrederick:frederick01@localhost:5432/cernfrederick';
 

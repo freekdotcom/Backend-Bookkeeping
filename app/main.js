@@ -13,10 +13,9 @@
   * @param  {[type]}
   * @return {[type]}
   */
-  app.get('/log/entries', bodyParser, asyncHandler(async (req, res, next) => {
+  app.get('/log/entries', bodyParser, asyncHandler(async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    const JSONResult = await database.GetAllLogEntries();
-    console.log(JSONResult);
+    const JSONResult = await database.getAllLogEntries();
     res.send(JSONResult);
   }));
 
@@ -29,7 +28,7 @@
    */
   app.get('/log/entry/:id', bodyParser, asyncHandler(async (req, res) =>{
     res.setHeader('Content-Type', 'application/json');
-    const JSONResult = await database.GetSingleLogEntry(req.params.id);
+    const JSONResult = await database.getSingleLogEntry(req.params.id);
     res.send(JSONResult);
   }));
 
@@ -38,10 +37,10 @@
   * @param  {[type]}
   * @return {[type]}
   */
-  app.post('/log/entries', bodyParser, asyncHandler(async (req, res, next) => {
-    const JSONResult = await database.PostLogEntry(req.body.bunches, 
-    req.body.scheme, req.body.fill, req.body.energy_per_beam, 
-    req.body.intensityPerBeam);
+  app.post('/log/entries', bodyParser, asyncHandler(async (req, res) => {
+    const JSONResult = await database.postLogEntry(req.body.bunches,
+      req.body.scheme, req.body.fill, req.body.energy_per_beam,
+      req.body.intensityPerBeam);
     res.setHeader('Content-Type', 'application/json');
     res.send(JSONResult);
   }));

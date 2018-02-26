@@ -15,7 +15,7 @@ module.exports = {
     "Promise": true
   },
   "parserOptions": {
-    "ecmaVersion": 6
+    "ecmaVersion": 8
   }, 
   "rules": {
     "max-len": ['error', {code: 100}], // default 80

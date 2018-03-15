@@ -7,7 +7,8 @@
  */
 'use strict';
 const pg = require('pg');
-const conString = 'postgres://cernfrederick:frederick01@localhost:5432/cernfrederick';
+const config = require('./../configuration_files/config.js');
+const conString = config.databaseIP;
 
 /**
  * [getAllLogEntries description] testing the database function

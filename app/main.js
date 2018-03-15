@@ -9,7 +9,8 @@
   'use strict';
   const bodyParser = require('body-parser').json();
   const express = require('express');
-  const app = express();
+ // const app = express();
+  const {JwtToken} = require('@aliceo2/aliceo2-gui');
   const winston = require('winston');
   const rest = require('./REST_api/rest');
   const asyncHandler = require('express-async-handler');
@@ -18,19 +19,32 @@
   const upload = multer({
     dest: 'uploads/' // this saves your file into a directory called "uploads"
   });
+
+  const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
+  const config = require('./configuration_files/config.js');
+
+  const httpServer = new HttpServer(config.httpConf, config.jwtConf);
+  httpServer.configureHelmet('localhost', 8090);
+  httpServer.passAsUrl('testKey', 'testValue');
+  httpServer.get('/hello', (req, res) => {
+    console.log('Inside ');
+    res.json('Hello World!');
+  });
+
+
   /**
    * @param  {[type]}
    * @param  {[type]}
    * @return {[type]}
    */
-  app.get('/log/entries', bodyParser, asyncHandler(async (req, res) => {
+  httpServer.get('/log/entries', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Credentials', 'false');
     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:63342');
     const JSONResult = await rest.getAllResponses();
     res.send(JSONResult);
-  }));
+  });
 
   /**
    * Gets a single log entry.
@@ -39,18 +53,17 @@
    * @param  {[type]} async            (req,         res [description]
    * @return {[type]}                  [description]
    */
-  app.get('/log/entry/:id', bodyParser, asyncHandler(async (req, res) => {
+  httpServer.get('/log/entry/:id', bodyParser, asyncHandler(async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const JSONResult = await rest.getSingleResponse(req.params.id);
     res.send(JSONResult);
   }));
-
   /**
    * @param  {[type]}
    * @param  {[type]}
    * @return {[type]}
    */
-  app.post('/log/entries', bodyParser, upload.single('file'),
+  httpServer.post('/log/entries', bodyParser, upload.single('file'),
     asyncHandler(async (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       if (req.file != null) {
@@ -72,13 +85,4 @@
         }
       }
     }));
-
-  /**
-   * @param  {[type]}
-   * @param  {[type]}
-   * @return {[type]}
-   */
-  app.listen(8080, '0.0.0.0', () => {
-    winston.log('info', 'listening');
-  });
 })();

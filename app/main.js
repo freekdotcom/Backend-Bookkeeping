@@ -8,9 +8,6 @@
 (() => {
   'use strict';
   const bodyParser = require('body-parser').json();
-  const express = require('express');
- // const app = express();
-  const {JwtToken} = require('@aliceo2/aliceo2-gui');
   const winston = require('winston');
   const rest = require('./REST_api/rest');
   const asyncHandler = require('express-async-handler');
@@ -20,14 +17,13 @@
     dest: 'uploads/' // this saves your file into a directory called "uploads"
   });
 
-  const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/aliceo2-gui');
+  const {HttpServer} = require('@aliceo2/aliceo2-gui');
   const config = require('./configuration_files/config.js');
 
   const httpServer = new HttpServer(config.httpConf, config.jwtConf);
   httpServer.configureHelmet('localhost', 8090);
   httpServer.passAsUrl('testKey', 'testValue');
   httpServer.get('/hello', (req, res) => {
-    console.log('Inside ');
     res.json('Hello World!');
   });
 

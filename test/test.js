@@ -7,27 +7,38 @@
  */
 (() => {
   'use strict';
-  // const assert = require('assert');
-  const expect = require('chai').expect;
-  const database = require('../app/database/database');
-  describe('Database promises', () => {
-    describe('GET ALL promise ', () => {
-      it('should return a Promise', () => {
-        const promisedGet = database.getAllLogEntries();
-        expect(promisedGet.then).to.be.a('Function');
+  const chai = require('chai');
+  const httpServer = require('../app/main.js').httpServer;
+  const testToken = '?personid=0&name=Anonymous&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
+  + 'eyJpZCI6MCwidXNlcm5hbWUiOiJBbm9ueW1vdXMiLCJhY2Nlc3MiOjAsImlhdCI6MTUyMTE5MjMxOSwiZXhwIjo'
+  + 'xNTIxMjc4NzE5LCJpc3MiOiJvMi11aSJ9.R7uAMYirOYBRoFictZ3DdXhx4XoFl9rKjUkyiWHopy8';
+  const expect = chai.expect;
+  let chaiHttp = require('chai-http');
+  chai.use(chaiHttp);
+
+  describe('REST GET Requests', () => {
+    after(() => {
+      httpServer.getServer.close();
+    });
+    describe('Get all entries ', () => {
+      it('should get all the entries successfully', (done) => {
+        chai.request('http://localhost:8080')
+          .get('/api/log/entries' + testToken)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            done();
+          });
       });
     });
-    describe('GET SINGLE promise', () => {
-      it('should return a Promise', () => {
-        const promisedGet = database.getSingleLogEntry(1);
-        expect(promisedGet.then).to.be.a('Function');
-      });
-    });
-    describe('POST promise', () => {
-      it('should return a Promise', () => {
-        const promisedPost = database.postLogEntry('test', 'test',
-          'test', 'test', 'test', 'test', 'test', 'test', 'test');
-        expect(promisedPost.then).to.be.a('Function');
+    describe('Get all entries no token', () => {
+      it('should not allow access when the token is not provided', (done) => {
+        chai.request('http://localhost:8080')
+          .get('/api/log/entries')
+          .end((err, res) => {
+            expect(res).to.have.status(403);
+            done();
+          });
       });
     });
   });

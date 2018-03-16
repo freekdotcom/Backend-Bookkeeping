@@ -11,13 +11,22 @@ const config = require('./../configuration_files/config.js');
 const conString = config.databaseIP;
 
 /**
+ * Initalizes the database
+ * @return {[type]} [description]
+ */
+function initDatabase() {
+  const client = new pg.Client(conString);
+  client.connect();
+  return client;
+}
+
+/**
  * [getAllLogEntries description] testing the database function
  * @return {array} All the results from the database.
  */
 function getAllLogEntries() {
   const results = [];
-  const client = new pg.Client(conString);
-  client.connect();
+  const client = initDatabase();
   let query = null;
   return new Promise((resolve, reject) => {
     try {
@@ -43,8 +52,7 @@ function getAllLogEntries() {
  */
 function getSingleLogEntry(runID) {
   let result = null;
-  const client = new pg.Client(conString);
-  client.connect();
+  const client = initDatabase();
   let query = null;
   return new Promise((resolve, reject) => {
     try {
@@ -80,8 +88,7 @@ function getSingleLogEntry(runID) {
 function postLogEntry(created, subsystem, Class, type, run, author, title,
   logEntryText, followUps, filePath) {
   const results = [];
-  const client = new pg.Client(conString);
-  client.connect();
+  const client = initDatabase();
   let query = null;
   return new Promise((resolve, reject) => {
     // filling in the req params
@@ -106,4 +113,4 @@ function postLogEntry(created, subsystem, Class, type, run, author, title,
     }
   });
 }
-module.exports = {getAllLogEntries, getSingleLogEntry, postLogEntry};
+module.exports = {getAllLogEntries, getSingleLogEntry, postLogEntry, initDatabase};

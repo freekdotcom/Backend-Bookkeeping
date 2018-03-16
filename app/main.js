@@ -8,26 +8,17 @@
 (() => {
   'use strict';
   const bodyParser = require('body-parser').json();
-  const winston = require('winston');
   const rest = require('./REST_api/rest');
   const asyncHandler = require('express-async-handler');
   const multer = require('multer');
   const fs = require('fs');
+  const {HttpServer, Log} = require('@aliceo2/aliceo2-gui');
+  const config = require('./configuration_files/config.js');
   const upload = multer({
     dest: 'uploads/' // this saves your file into a directory called "uploads"
   });
 
-  const {HttpServer} = require('@aliceo2/aliceo2-gui');
-  const config = require('./configuration_files/config.js');
-
   const httpServer = new HttpServer(config.httpConf, config.jwtConf);
-  httpServer.configureHelmet('localhost', 8090);
-  httpServer.passAsUrl('testKey', 'testValue');
-  httpServer.get('/hello', (req, res) => {
-    res.json('Hello World!');
-  });
-
-
   /**
    * @param  {[type]}
    * @param  {[type]}
@@ -49,11 +40,11 @@
    * @param  {[type]} async            (req,         res [description]
    * @return {[type]}                  [description]
    */
-  httpServer.get('/log/entry/:id', bodyParser, asyncHandler(async (req, res) => {
+  httpServer.get('/log/entry/:id', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const JSONResult = await rest.getSingleResponse(req.params.id);
     res.send(JSONResult);
-  }));
+  });
   /**
    * @param  {[type]}
    * @param  {[type]}
@@ -67,7 +58,7 @@
           let file = __dirname + '/' + req.file.filename;
           fs.rename(req.file.path, file, async function(err) {
             if (err) {
-              winston.log(err);
+              Log.error(err);
             } else {
               const JSONResult = await rest.postResponse(req.body.created, req.body.subsystem,
                 req.body.class, req.body.type, req.body.run, req.body.author, req.body.title,
@@ -81,4 +72,6 @@
         }
       }
     }));
+
+  module.exports = {httpServer};
 })();

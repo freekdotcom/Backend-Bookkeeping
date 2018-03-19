@@ -73,5 +73,12 @@
       }
     }));
 
-  module.exports = {httpServer};
+  /**
+   * This function closes the connection with the server
+   */
+  function closeServer() {
+    httpServer.getServer.close();
+  }
+
+  module.exports = {httpServer, closeServer};
 })();

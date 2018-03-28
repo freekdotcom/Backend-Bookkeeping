@@ -7,8 +7,8 @@
  */
 (() => {
   'use strict';
-  const database = require('./../database/database');
-
+  const Database = require('./../database/database.js').Database;
+  const database = Database.getInstance();
 
   async function getAllResponses() {
     let allEntries = await database.getAllLogEntries();
@@ -21,10 +21,16 @@
    * @return {string} the user thing
    */
   async function getSingleResponse(id) {
-    let oneEntry = await database.getSingleLogEntry(id);
+    const oneEntry = await database.getSingleLogEntry(id);
     return oneEntry;
   }
 
+  /**
+   * [filePromise description]
+   * @param  {[type]} file       [description]
+   * @param  {[type]} multerFile [description]
+   * @return {[type]}            [description]
+   */
   function filePromise(file, multerFile) {
     return new Promise((resolve, reject) => {
       try {

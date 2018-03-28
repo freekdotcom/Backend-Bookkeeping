@@ -12,13 +12,23 @@
   const asyncHandler = require('express-async-handler');
   const multer = require('multer');
   const fs = require('fs');
-  const {HttpServer, Log} = require('@aliceo2/aliceo2-gui');
-  const config = require('./configuration_files/config.js');
+  const {HttpServer, Log, JwtToken} = require('@aliceo2/aliceo2-gui');
+  //  const path = require('path');
+  const config = require('./configuration_files/config.json');
   const upload = multer({
     dest: 'uploads/' // this saves your file into a directory called "uploads"
   });
 
   const httpServer = new HttpServer(config.httpConf, config.jwtConf);
+  const jwt = new JwtToken(config.jwtConf);
+  const token = jwt.generateToken(1, 'code-example');
+  jwt.verify(token).then(() => {
+    Log.info('The token is verified');
+  }).catch(() => {
+    Log.error('The token could not be verified');
+  });
+
+
   /**
    * @param  {[type]}
    * @param  {[type]}

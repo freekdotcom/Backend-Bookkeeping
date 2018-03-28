@@ -12,7 +12,8 @@
         "eslint": "^4.19.0",
         "eslint-config-google": "^0.9.1",
         "eslint-plugin-security": "^1.4.0",
-        "mocha": "^3.5.3"
+        "mocha": "^3.5.3",
+        "sinon": "^4.4.8"
     },
     "dependencies": {
         "@aliceo2/aliceo2-gui": "^2.0.0",

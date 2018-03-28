@@ -5,112 +5,109 @@
  * copied verbatim in the file "LICENSE"
  *
  */
-'use strict';
-const pg = require('pg');
-const config = require('./../configuration_files/config.js');
-const conString = config.databaseIP;
 
-/**
- * Initalizes the database
- * @return {[type]} [description]
- */
-function initDatabase() {
-  const client = new pg.Client(conString);
-  client.connect();
-  return client;
-}
+const getQuery = {
+  name: 'fetch-all-log-entries',
+  text: 'SELECT * FROM log_entry LIMIT 10'
+};
 
-/**
- * [getAllLogEntries description] testing the database function
- * @return {array} All the results from the database.
- */
-function getAllLogEntries() {
-  const results = [];
-  const client = initDatabase();
-  let query = null;
-  return new Promise((resolve, reject) => {
-    try {
-      query = client.query('SELECT * FROM log_entry');
-      query.on('row', (row) => {
-        results.push(row);
-      });
+const Database = (() => {
+  'use strict';
+  let instance;
 
-      query.on('end', () => {
-        client.end();
-        resolve(results);
-      });
-    } catch (ex) {
-      reject(ex);
+  /**
+   * Initializes the database
+   * @return {database} Returns the database singleton
+   */
+  function privateInit() {
+    const pg = require('pg');
+    const {Log} = require('@aliceo2/aliceo2-gui');
+    const config = require('./../configuration_files/config.json');
+    const conString = config.databaseIP;
+    const client = new pg.Client(conString);
+    client.connect();
+    return {
+      getAllLogEntries: function() {
+        let results = [];
+        return new Promise((resolve, reject) => {
+          try {
+            client.query(getQuery, (err) => {
+              if (err) {
+                Log.error(err);
+                reject(err);
+              }
+            });
+            client.query(getQuery)
+              .then((res) => {
+                results = res.rows;
+                client.end();
+                resolve(results);
+              })
+              .catch((e) => reject(e));
+          } catch (ex) {
+            reject(ex);
+          }
+        });
+      },
+
+      getSingleLogEntry: function(id) {
+        let result = null;
+        const getSingleLogEntryQuery = {
+          name: 'fetch-log-entry',
+          text: 'SELECT * FROM log_entry WHERE run_id = $1',
+          values: [id]
+        };
+        return new Promise((resolve, reject) => {
+          client.query(getSingleLogEntryQuery, (err) => {
+            if (err) {
+              Log.error(err);
+              reject(err);
+            }
+          });
+          client.query(getSingleLogEntryQuery)
+            .then((res) => {
+              result = res.rows;
+              client.end();
+              resolve(result);
+            }).catch((e) => reject(e));
+        });
+      },
+
+      postLogEntry: function(created, subsystem, Class, type, run, author, title,
+        logEntryText, followUps, filePath) {
+        const postLogEntryQuery = {
+          name: 'post-log-entry',
+          text: 'INSERT INTO log_entry(created, subsystem, class,' +
+            'type, run, author, title, log_entry_text, follow_ups, saved_file_path) values ' +
+            '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+          values: [created, subsystem, Class, type, run,
+            author, title, logEntryText, followUps, filePath]
+        };
+
+        return new Promise((resolve, reject) => {
+          // filling in the req params
+          client.query(postLogEntryQuery, (err) => {
+            if (err) {
+              Log.error(err);
+              reject(err);
+            }
+          });
+          client.query(postLogEntryQuery).then((res) => {
+            res.end('Log entry is added to database');
+            client.end();
+            resolve(res);
+          }).catch((e) => reject(e));
+        });
+      }
+    };
+  }
+  return {
+    getInstance: () => {
+      if (!instance) {
+        instance = privateInit();
+      }
+      return instance;
     }
-  });
-}
-
-/**
- * [getSingleLogEntry description]
- * @param {[type]} runID [description]
- * @return {[type]} the log entry
- */
-function getSingleLogEntry(runID) {
-  let result = null;
-  const client = initDatabase();
-  let query = null;
-  return new Promise((resolve, reject) => {
-    try {
-      query = client.query('SELECT * FROM log_entry WHERE run_id = $1', [runID]);
-      query.on('row', (row) => {
-        result = row;
-      });
-
-      query.on('end', () => {
-        client.end();
-        resolve(result);
-      });
-    } catch (ex) {
-      reject(ex);
-    }
-  });
-}
-
-/**
- * [postLogEntry description]
- * @param  {[type]} created      [description]
- * @param  {[type]} subsystem    [description]
- * @param  {[type]} Class        [description]
- * @param  {[type]} type         [description]
- * @param  {[type]} run          [description]
- * @param  {[type]} author       [description]
- * @param  {[type]} title        [description]
- * @param  {[type]} logEntryText [description]
- * @param  {[type]} followUps    [description]
- * @param {[type]} filePath The path to the file saved with the log entry.
- * @return {[type]}              [description]
- */
-function postLogEntry(created, subsystem, Class, type, run, author, title,
-  logEntryText, followUps, filePath) {
-  const results = [];
-  const client = initDatabase();
-  let query = null;
-  return new Promise((resolve, reject) => {
-    // filling in the req params
-    try {
-      client.query('INSERT INTO log_entry(created, subsystem, class,' +
-        'type, run, author, title, log_entry_text, follow_ups, saved_file_path) values ' +
-        '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [created, subsystem, Class,
-        type, run, author, title, logEntryText, followUps, filePath
-      ]);
-      // proof that it succeeded.
-      query = client.query('SELECT * FROM log_entry');
-      query.on('row', (row) => {
-        results.push(row);
-      });
-
-      query.on('end', () => {
-        client.end();
-        resolve(results);
-      });
-    } catch (ex) {
-      reject(ex);
-    }
-  });
-}
-module.exports = {getAllLogEntries, getSingleLogEntry, postLogEntry, initDatabase};
+  };
+})();
+module.exports = {Database};

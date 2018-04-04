@@ -21,6 +21,17 @@
 
   const httpServer = new HttpServer(config.httpConf, config.jwtConf);
   const jwt = new JwtToken(config.jwtConf);
+  if (fs.existsSync('./app/controllers')) {
+    fs.readdirSync('./app/controllers').forEach((file) => {
+      if (file.substr(-3) == '.js') {
+        let route = require('../app/controllers/' + file);
+        route.controller(httpServer);
+      }
+    });
+  } else {
+    Log.error('Could not read controllers folder');
+  }
+
   const token = jwt.generateToken(1, 'code-example');
   jwt.verify(token).then(() => {
     Log.info('The token is verified');
@@ -34,7 +45,7 @@
    * @param  {[type]}
    * @return {[type]}
    */
-  httpServer.get('/log/entries', async (req, res) => {
+  /* httpServer.get('/log/entries', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Credentials', 'false');
     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
@@ -50,7 +61,7 @@
    * @param  {[type]} async            (req,         res [description]
    * @return {[type]}                  [description]
    */
-  httpServer.get('/log/entry/:id', async (req, res) => {
+  /* httpServer.get('/log/entry/:id', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const JSONResult = await rest.getSingleResponse(req.params.id);
     res.send(JSONResult);

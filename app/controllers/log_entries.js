@@ -1,26 +1,22 @@
 /*
-* @Author: Frederick van der Meulen
-* @Date:   2018-03-26 09:48:27
-* @Last Modified by:   Frederick van der Meulen
-* @Last Modified time: 2018-04-04 11:00:11
-*/
-const bodyParser = require('body-parser').json();
-const multer = require('multer');
-const upload = multer({
-  dest: 'uploads/' // this saves your file into a directory called "uploads"
-});
-
-module.exports.controller = ((httpServer) => {
-  httpServer.get('/all/entries', async (req, res) => {
-    res.render('log/entries');
-  });
-
-  httpServer.get('/single/entry', async (req, res) => {
-    res.render('log/entry/:id');
-  });
-
-  httpServer.post('/post/entry', bodyParser,
-    upload.single('file'), async (req, res) => {
-      res.render('log/entry');
-    });
-});
+ * Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
+ *
+ * This software is distributed under the therms of the
+ * GNU General Public Licence version 3 (GPL) version 3,
+ * copied verbatim in the file "LICENSE"
+ *
+ * Currently empty due to unexpected issues.
+ */
+// (() => {
+// 'use strict';
+// const logEntry = require('../models/log_entries');
+// const view = require('../views/log_entries');
+// const httpServer = require('../main.js');
+// httpServer.get('/', (req, res, next) => {
+//   const single = new logEntries(req.params.id);
+//   single.getSingleLogEntry((result) => {
+//     result = view.render(result);
+//     res.send(result);
+//   })
+// })
+// })();

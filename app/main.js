@@ -28,6 +28,11 @@
   httpServer.get('/single/entry/:id', (req, res) => {
     const single = new logEntry.LogEntries(req.params.id);
     single.getSingleLogEntry((result) => {
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', true);
+
       result = view.render(result);
       res.send(result);
     });
@@ -37,6 +42,11 @@
   httpServer.get('/all/entries', (req, res) => {
     const all = new logEntry.LogEntries();
     all.getAllEntries((result) => {
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', true);
+
       result = view.render(result);
       res.send(result);
     });
@@ -45,6 +55,11 @@
   httpServer.post('/post/entry', (req, res) => {
     const post = new logEntry.LogEntries(0, req);
     post.postEntry((result) => {
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+      res.setHeader('Access-Control-Allow-Methods', 'POST');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', true);
+
       result = view.render(result);
       res.send(result);
     });

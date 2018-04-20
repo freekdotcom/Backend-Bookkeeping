@@ -11,6 +11,8 @@
   const Database = require('./../database/database.js').Database;
   const database = Database.getInstance();
   const {Log} = require('@aliceo2/aliceo2-gui');
+  // const formidable = require('formidable');
+  // const path = require('path');
 
   /**
    * The log entry model
@@ -25,6 +27,7 @@
       this.id = id;
       this.req = req;
     }
+
 
     /**
      * Gets a single log entry from the database
@@ -45,12 +48,11 @@
             reject(err);
           }
         });
-        database.getClient().query(getSingleLogEntryQuery)
-          .then((res) => {
-            result = res.rows;
-            callback(result);
-            resolve(result);
-          }).catch((e) => reject(e));
+        database.getClient().query(getSingleLogEntryQuery).then((res) => {
+          result = res.rows;
+          callback(result);
+          resolve(result);
+        }).catch((e) => reject(e));
       });
     }
 
@@ -61,10 +63,7 @@
      */
     getAllEntries(callback) {
       let results = null;
-      const getAllEntriesQuery = {
-        name: 'fetch-all-log-entries',
-        text: 'SELECT * FROM log_entry'
-      };
+      const getAllEntriesQuery = {name: 'fetch-all-log-entries', text: 'SELECT * FROM log_entry'};
       return new Promise((resolve, reject) => {
         database.getClient().query(getAllEntriesQuery, (err) => {
           if (err) {
@@ -72,12 +71,11 @@
             reject(err);
           }
         });
-        database.getClient().query(getAllEntriesQuery)
-          .then((res) => {
-            results = res.rows;
-            callback(results);
-            resolve(resolve);
-          }).catch((ex) => reject(ex));
+        database.getClient().query(getAllEntriesQuery).then((res) => {
+          results = res.rows;
+          callback(results);
+          resolve(resolve);
+        }).catch((ex) => reject(ex));
       });
     }
 
@@ -86,8 +84,9 @@
      * @param  {Function} callback [description]
      * @return {[type]} confirmation message to the client
      */
-    postEntry(callback) {
+    async postEntry(callback) {
       let result = null;
+      let filePath = await this.fileStorage(this.req);
       const postLogEntryQuery = {
         name: 'post-log-entry',
         text: 'INSERT INTO log_entry(created, subsystem, class,' +
@@ -95,7 +94,8 @@
           '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
         values: [this.req.body.created, this.req.body.subsystem, this.req.body.class,
           this.req.body.type, this.req.body.run, this.req.body.author, this.req.body.title,
-          this.req.body.logEntryText, this.req.body.followUps]
+          this.req.body.logEntryText, this.req.body.followUps, filePath
+        ]
       };
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryQuery, (err) => {
@@ -112,6 +112,38 @@
           }).catch((ex) => reject(ex));
       });
     }
+
+    /**
+     * Method that handles the storage of files. It stores the file into a path
+     * and returns the path of the file into the database
+     * To be further developed due to middleware issues
+     * @param  {request object} req The request object filled with data
+     * @return {string}     path of the file
+     */
+    // fileStorage(req) {
+    //   const uploadDir = path.join(__dirname, '/..', 'test', '/uploads/');
+    //   if (req.file == null){
+    //     return '';
+    //   }
+    //   let form = new formidable.IncomingForm();
+    //   form.multiple = true;
+    //   form.keepExtension = true;
+    //   form.uploadDir = uploadDir;
+    //   return new Promise((resolve, reject) => {
+    //     form.parse(req, (err) => {
+    //       if (err){
+    //        reject(err);
+    //      }
+
+    //       Log.debug('No error detected. File is stored at: ' + req.file.path);
+    //       resolve(file.path);
+    //     });
+    //     form.on('fileBegin', ((name, ) => {
+    //       const reqFileName = req.file.name.split('.');
+    //       req.file.path = path.join(uploadDir, '${fileName}');
+    //     }));
+    //   });
+    // }
   }
   module.exports = {LogEntries};
 })();

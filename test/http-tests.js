@@ -8,7 +8,7 @@
 
 'use strict';
 
-const {HttpServer, JwtToken} = require('@aliceo2/aliceo2-gui');
+const {HttpServer, JwtToken} = require('@aliceo2/web-ui');
 const assert = require('assert');
 const http = require('http');
 const url = require('url');

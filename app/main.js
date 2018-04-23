@@ -8,7 +8,7 @@
  */
 (() => {
   'use strict';
-  const {HttpServer} = require('@aliceo2/aliceo2-gui');
+  const {HttpServer} = require('@aliceo2/web-ui');
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
 
@@ -29,7 +29,7 @@
 
   // Gets a single entry from the database
   httpServer.get('/single/entry/:id', (req, res) => {
-    const single = new logEntry.LogEntries();
+    const single = new logEntry.LogEntries(req);
     single.getSingleLogEntry((result) => {
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
       res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -42,7 +42,7 @@
 
   // Gets all the entries from the database
   httpServer.get('/all/entries', (req, res) => {
-    const all = new logEntry.LogEntries();
+    const all = new logEntry.LogEntries(req);
     all.getAllEntries((result) => {
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
       res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -54,7 +54,7 @@
   });
 
   httpServer.post('/post/entry/data', (req, res) => {
-    const post = new logEntry.LogEntries();
+    const post = new logEntry.LogEntries(req);
     post.postDataEntry((result) => {
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
       res.setHeader('Access-Control-Allow-Methods', 'POST');

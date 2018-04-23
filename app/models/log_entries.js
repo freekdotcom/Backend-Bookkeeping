@@ -10,7 +10,7 @@
   'use strict';
   const Database = require('./../database/database.js').Database;
   const database = Database.getInstance();
-  const {Log} = require('@aliceo2/aliceo2-gui');
+  const {Log} = require('@aliceo2/web-ui');
   // const formidable = require('formidable');
   // const path = require('path');
 

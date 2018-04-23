@@ -17,9 +17,9 @@ const Database = (() => {
    */
   function privateInit() {
     const pg = require('pg');
-    const config = require('./../configuration_files/config.json');
-    const conString = config.databaseIP;
-    const client = new pg.Client(conString);
+    const Config = require('./../configuration_files/Config.js').Config;
+    const config = Config.getInstance();
+    const client = new pg.Client(config.getDatabaseConfiguration());
     client.connect();
     return {
 

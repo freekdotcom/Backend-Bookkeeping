@@ -20,11 +20,9 @@
   class LogEntries {
     /**
      * The constructor of the log entry model
-     * @param  {[type]} id  [description]
      * @param  {[type]} req [description]
      */
-    constructor(id, req) {
-      this.id = id;
+    constructor(req) {
       this.req = req;
     }
 
@@ -39,7 +37,7 @@
       const getSingleLogEntryQuery = {
         name: 'fetch-log-entry',
         text: 'SELECT * FROM log_entry WHERE run_id = $1',
-        values: [this.id]
+        values: [this.req.params.id]
       };
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogEntryQuery, (err) => {
@@ -84,27 +82,60 @@
      * @param  {Function} callback [description]
      * @return {[type]} confirmation message to the client
      */
-    async postEntry(callback) {
+    // async postEntry(callback) {
+    //   let result = null;
+    //   let filePath = await this.fileStorage(this.req);
+    //   const postLogEntryQuery = {
+    //     name: 'post-log-entry',
+    //     text: 'INSERT INTO log_entry(created, subsystem, class,' +
+    //       'type, run, author, title, log_entry_text, follow_ups, saved_file_path) values ' +
+    //       '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+    //     values: [this.req.body.created, this.req.body.subsystem, this.req.body.class,
+    //       this.req.body.type, this.req.body.run, this.req.body.author, this.req.body.title,
+    //       this.req.body.logEntryText, this.req.body.followUps, filePath
+    //     ]
+    //   };
+    //   return new Promise((resolve, reject) => {
+    //     database.getClient().query(postLogEntryQuery, (err) => {
+    //       if (err) {
+    //         Log.error(err);
+    //         reject(err);
+    //       }
+    //     });
+    //     database.getClient().query(postLogEntryQuery)
+    //       .then(() => {
+    //         result = 'Entry has been added to the database';
+    //         callback(result);
+    //         resolve(result);
+    //       }).catch((ex) => reject(ex));
+    //   });
+    // }
+    /**
+     * Description TO BE FURTHER WRIITEN DOWN LATER
+     * @param  {Function} callback TO BE FURTHER WRIITEN DOWN LATER
+     * @return {arrau}            TO BE FURTHER WRIITEN DOWN LATER
+     */
+    postDataEntry(callback) {
       let result = null;
-      let filePath = await this.fileStorage(this.req);
-      const postLogEntryQuery = {
+      // console.log(this.req.body);
+      const postLogEntryDataQuery = {
         name: 'post-log-entry',
         text: 'INSERT INTO log_entry(created, subsystem, class,' +
-          'type, run, author, title, log_entry_text, follow_ups, saved_file_path) values ' +
-          '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+          'type, run, author, title, log_entry_text, follow_ups) values ' +
+          '($1, $2, $3, $4, $5, $6, $7, $8, $9)',
         values: [this.req.body.created, this.req.body.subsystem, this.req.body.class,
-          this.req.body.type, this.req.body.run, this.req.body.author, this.req.body.title,
-          this.req.body.logEntryText, this.req.body.followUps, filePath
-        ]
+          this.req.body.type, this.req.body.run, this.req.body.author,
+          this.req.body.title,
+          this.req.body.logEntryText, this.req.body.followUps]
       };
       return new Promise((resolve, reject) => {
-        database.getClient().query(postLogEntryQuery, (err) => {
+        database.getClient().query(postLogEntryDataQuery, (err) => {
           if (err) {
             Log.error(err);
             reject(err);
           }
         });
-        database.getClient().query(postLogEntryQuery)
+        database.getClient().query(postLogEntryDataQuery)
           .then(() => {
             result = 'Entry has been added to the database';
             callback(result);

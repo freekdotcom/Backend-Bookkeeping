@@ -91,14 +91,14 @@
         this.req.body.title,
         this.req.body.log_entry_text, this.req.body.followUps];
       return new Promise((resolve, reject) => {
-        database.getClient().query(postLogEntryDataQuery,
-          postLogEntryDataValues, (err) => {
-            if (err) {
-              Log.error(err);
-              callback(err);
-              reject(err);
-            }
-          });
+        // database.getClient().query(postLogEntryDataQuery,
+        //   postLogEntryDataValues, (err) => {
+        //     if (err) {
+        //       Log.error(err);
+        //       callback(err);
+        //       reject(err);
+        //     }
+        //   });
         database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
           .then(() => {
             result = 'Entry has been added to the database';

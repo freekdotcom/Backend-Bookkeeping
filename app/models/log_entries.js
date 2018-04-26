@@ -82,26 +82,24 @@
      */
     postDataEntry(callback) {
       let result = null;
-      const postLogEntryDataQuery = {
-        name: 'post-data-log-entry',
-        text: 'INSERT INTO log_entry(created, subsystem, class,' +
+      const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
           'type, run, author, title, log_entry_text, follow_ups) values ' +
-          '($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-        values: [this.req.body.created, this.req.body.subsystem, this.req.body.class,
-          this.req.body.type, this.req.body.run, this.req.body.author,
-          this.req.body.title,
-          this.req.body.log_entry_text, this.req.body.followUps
-        ]
-      };
+          '($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+      const postLogEntryDataValues = [this.req.body.created,
+        this.req.body.subsystem, this.req.body.class,
+        this.req.body.type, this.req.body.run, this.req.body.author,
+        this.req.body.title,
+        this.req.body.log_entry_text, this.req.body.followUps];
       return new Promise((resolve, reject) => {
-        database.getClient().query(postLogEntryDataQuery, (err) => {
-          if (err) {
-            Log.error(err);
-            callback(err);
-            reject(err);
-          }
-        });
-        database.getClient().query(postLogEntryDataQuery)
+        database.getClient().query(postLogEntryDataQuery,
+          postLogEntryDataValues, (err) => {
+            if (err) {
+              Log.error(err);
+              callback(err);
+              reject(err);
+            }
+          });
+        database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
           .then(() => {
             result = 'Entry has been added to the database';
             callback(result);

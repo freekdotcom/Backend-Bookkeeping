@@ -12,7 +12,7 @@
   const database = Database.getInstance();
   const {Log} = require('@aliceo2/web-ui');
   // const formidable = require('formidable');
-  // const path = require('path');
+  // const fs = require('fs');
 
   /**
    * The log entry model
@@ -26,7 +26,6 @@
       this.req = req;
     }
 
-
     /**
      * Gets a single log entry from the database
      * @param  {Function} callback
@@ -34,23 +33,22 @@
      */
     getSingleLogEntry(callback) {
       let result = null;
-      const getSingleLogEntryQuery = {
-        name: 'fetch-log-entry',
-        text: 'SELECT * FROM log_entry WHERE run_id = $1',
-        values: [this.req.params.id]
-      };
+      const getSingleLogEntryQuery = 'SELECT * FROM log_entry WHERE run_id = $1';
+      const getSingleLogEntryValues = [this.req.params.id];
       return new Promise((resolve, reject) => {
-        database.getClient().query(getSingleLogEntryQuery, (err) => {
-          if (err) {
-            Log.error(err);
-            reject(err);
-          }
-        });
-        database.getClient().query(getSingleLogEntryQuery).then((res) => {
+        database.getClient().query(getSingleLogEntryQuery,
+          getSingleLogEntryValues, (err) => {
+            if (err) {
+              Log.error(err);
+              reject(err);
+            }
+          });
+        database.getClient().query(getSingleLogEntryQuery,
+          getSingleLogEntryValues).then((res) => {
           result = res.rows;
           callback(result);
           resolve(result);
-        }).catch((e) => reject(e));
+        }).catch(() => reject('The entry does not exist'));
       });
     }
 
@@ -61,7 +59,7 @@
      */
     getAllEntries(callback) {
       let results = null;
-      const getAllEntriesQuery = {name: 'fetch-all-log-entries', text: 'SELECT * FROM log_entry'};
+      const getAllEntriesQuery = 'SELECT * FROM log_entry';
       return new Promise((resolve, reject) => {
         database.getClient().query(getAllEntriesQuery, (err) => {
           if (err) {
@@ -72,44 +70,11 @@
         database.getClient().query(getAllEntriesQuery).then((res) => {
           results = res.rows;
           callback(results);
-          resolve(resolve);
+          resolve(results);
         }).catch((ex) => reject(ex));
       });
     }
 
-    /**
-     * Posts an single log entry to the database
-     * @param  {Function} callback [description]
-     * @return {[type]} confirmation message to the client
-     */
-    // async postEntry(callback) {
-    //   let result = null;
-    //   let filePath = await this.fileStorage(this.req);
-    //   const postLogEntryQuery = {
-    //     name: 'post-log-entry',
-    //     text: 'INSERT INTO log_entry(created, subsystem, class,' +
-    //       'type, run, author, title, log_entry_text, follow_ups, saved_file_path) values ' +
-    //       '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-    //     values: [this.req.body.created, this.req.body.subsystem, this.req.body.class,
-    //       this.req.body.type, this.req.body.run, this.req.body.author, this.req.body.title,
-    //       this.req.body.logEntryText, this.req.body.followUps, filePath
-    //     ]
-    //   };
-    //   return new Promise((resolve, reject) => {
-    //     database.getClient().query(postLogEntryQuery, (err) => {
-    //       if (err) {
-    //         Log.error(err);
-    //         reject(err);
-    //       }
-    //     });
-    //     database.getClient().query(postLogEntryQuery)
-    //       .then(() => {
-    //         result = 'Entry has been added to the database';
-    //         callback(result);
-    //         resolve(result);
-    //       }).catch((ex) => reject(ex));
-    //   });
-    // }
     /**
      * Description TO BE FURTHER WRIITEN DOWN LATER
      * @param  {Function} callback TO BE FURTHER WRIITEN DOWN LATER
@@ -117,21 +82,22 @@
      */
     postDataEntry(callback) {
       let result = null;
-      // console.log(this.req.body);
       const postLogEntryDataQuery = {
-        name: 'post-log-entry',
+        name: 'post-data-log-entry',
         text: 'INSERT INTO log_entry(created, subsystem, class,' +
           'type, run, author, title, log_entry_text, follow_ups) values ' +
           '($1, $2, $3, $4, $5, $6, $7, $8, $9)',
         values: [this.req.body.created, this.req.body.subsystem, this.req.body.class,
           this.req.body.type, this.req.body.run, this.req.body.author,
           this.req.body.title,
-          this.req.body.logEntryText, this.req.body.followUps]
+          this.req.body.log_entry_text, this.req.body.followUps
+        ]
       };
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryDataQuery, (err) => {
           if (err) {
             Log.error(err);
+            callback(err);
             reject(err);
           }
         });
@@ -145,34 +111,55 @@
     }
 
     /**
-     * Method that handles the storage of files. It stores the file into a path
-     * and returns the path of the file into the database
-     * To be further developed due to middleware issues
-     * @param  {request object} req The request object filled with data
-     * @return {string}     path of the file
+     * [postFileEntry description]
+     * @param  {Function} callback [description]
+     * @return {[type]}            [description]
      */
-    // fileStorage(req) {
-    //   const uploadDir = path.join(__dirname, '/..', 'test', '/uploads/');
-    //   if (req.file == null){
-    //     return '';
-    //   }
-    //   let form = new formidable.IncomingForm();
-    //   form.multiple = true;
-    //   form.keepExtension = true;
-    //   form.uploadDir = uploadDir;
-    //   return new Promise((resolve, reject) => {
-    //     form.parse(req, (err) => {
-    //       if (err){
-    //        reject(err);
-    //      }
+    async postFileEntry(callback) {
+      let result = null;
+      const filePath = await this.fileStorage();
+      const postLogEntryFileQuery = {
+        name: 'post-file-log-entry',
+        text: 'UPDATE log_entry SET saved_file_path=($1) WHERE run_id=($2)',
+        values: [filePath, this.req.params.id]
+      };
+      return new Promise((resolve, reject) => {
+        if (filePath == undefined) {
+          Log.error('File is undefined');
+          reject('File is undefined');
+        }
+        database.getClient().query(postLogEntryFileQuery)
+          .then(() => {
+            result = 'Filepaths are added to the database';
+            callback(result);
+            resolve(result);
+          }).catch((ex) => reject(ex));
+      });
+    }
 
-    //       Log.debug('No error detected. File is stored at: ' + req.file.path);
-    //       resolve(file.path);
+    // /**
+    //  * Method to handle storing files into the server
+    //  * @return {[type]} [description]
+    //  */
+    // fileStorage() {
+    //   let form = new formidable.IncomingForm();
+    //   return new Promise((resolve, reject) => {
+    //     if (this.req.files == undefined) {
+    //       Log.error('No File found');
+    //       return undefined;
+    //     }
+    //     form.parse(this.req, (err, fields, files) => {
+    //       const oldPath = this.req.files.file.path;
+    //       const newPath = './uploads/files/' + this.req.params.id + '/' +
+    //         this.req.files.file.name;
+    //       fs.rename(oldPath, newPath, (err) => {
+    //         if (err) {
+    //           reject(err);
+    //         }
+    //         const result = newPath;
+    //         resolve(result);
+    //       });
     //     });
-    //     form.on('fileBegin', ((name, ) => {
-    //       const reqFileName = req.file.name.split('.');
-    //       req.file.path = path.join(uploadDir, '${fileName}');
-    //     }));
     //   });
     // }
   }

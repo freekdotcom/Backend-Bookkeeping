@@ -11,10 +11,11 @@
   const {HttpServer} = require('@aliceo2/web-ui');
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
-
-  //  const jwt = new JwtToken(config.);
   const logEntry = require('./models/log_entries');
   const view = require('./views/log_entries');
+  const user = require('./models/users');
+
+  //  const jwt = new JwtToken(config.);
 
   /*  const token = jwt.generateToken(1, 'code-example');
   jwt.verify(token).then(() => {
@@ -65,15 +66,30 @@
     });
   });
 
-  // httpServer.post('/post/entry', (req, res) => {
-  //   const post = new logEntry.LogEntries(0, req);
-  //   post.postEntry((result) => {
-  //     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
-  //     res.setHeader('Access-Control-Allow-Methods', 'POST');
-  //     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  //     res.setHeader('Access-Control-Allow-Credentials', true);
-  //     result = view.render(result);
-  //     res.send(result);
-  //   });
-  // });
+  httpServer.post('/post/entry/file/:id', (req, res) =>{
+    const postFile = new logEntry.LogEntries(req);
+    postFile.postFileEntry((result) => {
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+      res.setHeader('Access-Control-Allow-Methods', 'POST');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', true);
+      result = view.render(result);
+      res.send(result);
+    });
+  });
+
+  httpServer.post('/user/login/info', (req, res) => {
+    const postUser = new user.User(req);
+    postUser.postUserAuthentication((result) => {
+      if (result[1] == false) {
+        res.send(result[0]);
+        res.status(400);
+      }
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+      res.setHeader('Access-Control-Allow-Methods', 'POST');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', true);
+      res.send(result[0]);
+    });
+  });
 })();

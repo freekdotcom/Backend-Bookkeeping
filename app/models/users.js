@@ -1,58 +1,71 @@
-// /*
-//  * @Author: Frederick van der Meulen
-//  * @Date:   2018-04-24 09:20:44
-//  * @Last Modified by:   Frederick van der Meulen
-//  * @Last Modified time: 2018-04-26 09:06:06
-//  */
-// (() => {
-//   'use strict';
-//   const Database = require('./../database/database.js').Database;
-//   const database = Database.getInstance();
-//   const { Log, JwtToken } = require('@aliceo2/web-ui');
-//   const Config = require('./../configuration_files/Config.js').Config;
-//   const config = Config.getInstance();
+/*
+ * @Author: Frederick van der Meulen
+ * @Date:   2018-04-24 09:20:44
+ * @Last Modified by:   Frederick van der Meulen
+ * @Last Modified time: 2018-05-09 10:05:10
+ */
+(() => {
+  'use strict';
+  const Database = require('./../database/database.js').Database;
+  const database = Database.getInstance();
+  const {JwtToken, Log} = require('@aliceo2/web-ui');
+  const Config = require('./../configuration_files/Config.js').Config;
+  const config = Config.getInstance();
+  const jwt = new JwtToken(config.getJsonWebTokenConfiguration());
+  const argon2 = require('argon2');
 
-//   const passwordHash = require('password-hash');
-//   const user = require('./../configuration_files/UserExample.json');
+  /**
+   * The user model class
+   */
+  class User {
+    /**
+     * The constructor of the user model
+     * @param  {request} req The given request
+     */
+    constructor(req) {
+      this.req = req;
+    }
 
+    /**
+     * The autentication method for the users. TODO: Implement SAMS
+     * @param  {return} callback Returns the JWToken
+     * @return {JWToken} The JSONWebToken
+     */
+    postUserAuthentication(callback) {
+      let result = undefined;
+      const userAuthenticationQuery = 'SELECT * FROM users.users WHERE email = $1';
+      const userAuthenticationQueryValues = [this.req.body.email];
+      return new Promise((resolve, reject) => {
+        if (this.req.body.email == undefined ||
+          this.req.body.password == undefined) {
+          reject('No email address or password is filled in. Please try again.');
+        }
 
-//   class User {
-
-//     constructor(req) {
-//       this.req = req;
-//     }
-
-//     postUserAuthentication(callback) {
-//       return new Promise((resolve, reject) => {
-//         if (this.req.body == undefined) {
-//           callback(['The body is undefined!', false]);
-//           reject(['The password or the user name is missing!', false]);
-//         }
-
-//         if (this.req.body.name == undefined || this.req.body.password == undefined) {
-//           callback(['The password or the user name is missing!', false]);
-//           reject(['The password or the user name is missing!', false]);
-//         }
-//         if (this.req.body.name == user.user.name
-//           && passwordHash.verify(this.req.body.password, user.user.password)) {
-//           const jwt = new JwtToken(config.getJsonWebTokenConfiguration());
-//           const token = jwt.generateToken(user.id, user.name);
-//           jwt.verify(token).then(() => {
-//             Log.info('The token is verified');
-//             callback([token, true]);
-//             resolve([token, true]);
-//           }).catch(() => {
-//             Log.error('The token could not be verified');
-//             reject('Token not verified')
-//           });
-
-//         } else {
-
-//         }
-//       })
-
-//       //
-//     }
-//   }
-//   module.exports = { User };
-// })();
+        database.getClient().query(userAuthenticationQuery,
+          userAuthenticationQueryValues).then((res) => {
+          result = res.rows;
+          if (result[0].password == undefined) {
+            reject('The password or emailaddress is not found. Please try again.');
+          }
+          argon2.verify(result[0].password, this.req.body.password).then((match) => {
+            if (match) {
+              const token = jwt.generateToken(res.id, res.name);
+              callback(token);
+              resolve(token);
+            } else {
+              reject('The password or emailaddress is not found. Please try again');
+            }
+          }).catch((err) => {
+            Log.error('Internal failure. Cause: ' + err);
+            throw (err);
+          });
+        }).catch((err) => {
+          throw (err);
+        });
+      }).catch((err) => {
+        throw (err);
+      });
+    }
+  }
+  module.exports = {User};
+})();

@@ -54,4 +54,8 @@ describe('REST API', () => {
       done();
     });
   });
+
+  after(() => {
+    httpServer.getServer.close();
+  });
 });

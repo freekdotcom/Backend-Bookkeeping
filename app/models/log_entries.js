@@ -11,6 +11,7 @@
   const Database = require('./../database/database.js').Database;
   const database = Database.getInstance();
   const fs = require('fs');
+  const mkdirp = require('mkdirp');
 
   /**
    * The log entry model
@@ -87,13 +88,14 @@
     postDataEntry(callback) {
       let result = null;
       const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
-          'type, run, author, title, log_entry_text, follow_ups) values ' +
-          '($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+        'type, run, author, title, log_entry_text, follow_ups) values ' +
+        '($1, $2, $3, $4, $5, $6, $7, $8, $9)';
       const postLogEntryDataValues = [this.req.body.created,
         this.req.body.subsystem, this.req.body.class,
         this.req.body.type, this.req.body.run, this.req.body.author,
         this.req.body.title,
-        this.req.body.log_entry_text, this.req.body.followUps];
+        this.req.body.log_entry_text, this.req.body.followUps
+      ];
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
           .then(() => {
@@ -111,13 +113,7 @@
      */
     async postFileEntry(callback) {
       let result = null;
-      fs.rename(this.req.file.path,
-        this.req.file.destination + this.req.file.originalname, ((err) => {
-          if (err) {
-            throw (err);
-          }
-        }));
-      const filePath = this.req.file.destination + this.req.file.originalname;
+      const filePath = await this.filePlacement();
       const postLogEntryFileQuery = {
         name: 'post-file-log-entry',
         text: 'UPDATE log_entry SET saved_file_path=($1) WHERE run_id=($2)',
@@ -130,6 +126,24 @@
             callback(result);
             resolve(result);
           }).catch((ex) => reject('File could not be uploaded. Cause: ' + ex));
+      });
+    }
+
+    /**
+     * Method to place the file to another location on the server
+     * @return {string} The new path of the file
+     */
+    filePlacement() {
+      return new Promise((resolve, reject) => {
+        const newFilePath = 'uploads/link/test/';
+        mkdirp(newFilePath, (err) => {
+          if (err) {
+            reject('Could not move file. Cause: ' + err);
+            fs.unlink(this.req.file.path);
+          }
+          fs.rename(this.req.file.path, newFilePath + this.req.file.originalname);
+          resolve(newFilePath);
+        });
       });
     }
   }

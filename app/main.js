@@ -14,6 +14,7 @@
   const logEntry = require('./models/log_entries');
   const view = require('./views/log_entries');
   const user = require('./models/users');
+  const fs = require('fs');
 
   /**
    * TODO : Implement once CORS works
@@ -98,6 +99,7 @@
       result = view.render(result);
       res.send(result);
     }).catch((error) => {
+      fs.unlink(req.file.path);
       errorHandling(res, error);
     });
   });

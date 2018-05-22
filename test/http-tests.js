@@ -24,6 +24,8 @@ describe('REST API', () => {
     httpServer = new HttpServer(config.getServerConfiguration(),
       config.getJsonWebTokenConfiguration());
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
+    httpServer.get('/get-file', (req, res) => res.download('uploads/daq/foo.txt'));
+    httpServer.get('/get-bad-file', (req, res) => res.download('uploads/das/foo.txt'));
   });
 
   it('should retrieve the user details when "/" is used', (done) => {
@@ -51,6 +53,22 @@ describe('REST API', () => {
     http.get('http://localhost:' + config.getServerConfiguration().port +
       '/api/get-request?token=' + token, (res) => {
       assert.strictEqual(res.statusCode, 200);
+      done();
+    });
+  });
+
+  it('should download a file', (done) => {
+    http.get('http://localhost:' + config.getServerConfiguration().port +
+      '/api/get-file?token=' + token, (res) => {
+      assert.strictEqual(res.statusCode, 200);
+      done();
+    });
+  });
+
+  it('should throw an error when the file path is wrong', (done) => {
+    http.get('http://localhost:' + config.getServerConfiguration().port +
+      '/api/get-bad-file?token=' + token, (res) => {
+      assert.strictEqual(res.statusCode, 500);
       done();
     });
   });

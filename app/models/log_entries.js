@@ -59,7 +59,9 @@
           result = res.rows[0];
           callback(result);
           resolve(result);
-        }).catch(() => reject('The entry does not exist'));
+        }).catch((ex) => {
+          reject('The file cannot be found. The error is: ' + ex);
+        });
       });
     }
 
@@ -81,9 +83,9 @@
     }
 
     /**
-     * Description TO BE FURTHER WRIITEN DOWN LATER
-     * @param  {Function} callback TO BE FURTHER WRIITEN DOWN LATER
-     * @return {arrau}            TO BE FURTHER WRIITEN DOWN LATER
+     * Inserts the log entry into the database
+     * @param  {Function} callback [description]
+     * @return {[type]}            [description]
      */
     postDataEntry(callback) {
       let result = null;
@@ -107,13 +109,14 @@
     }
 
     /**
-     * [postFileEntry description]
+     * Adds the file path to the database.
      * @param  {Function} callback [description]
      * @return {[type]}            [description]
      */
     async postFileEntry(callback) {
       let result = null;
-      const filePath = await this.filePlacement();
+      const filePath = await this.filePlacement()
+        .catch((ex) => callback(ex));
       const postLogEntryFileQuery = {
         name: 'post-file-log-entry',
         text: 'UPDATE log_entry SET saved_file_path=($1) WHERE run_id=($2)',
@@ -135,7 +138,7 @@
      */
     filePlacement() {
       return new Promise((resolve, reject) => {
-        const newFilePath = 'uploads/link/test/';
+        const newFilePath = 'uploads/';
         mkdirp(newFilePath, (err) => {
           if (err) {
             reject('Could not move file. Cause: ' + err);

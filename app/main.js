@@ -8,7 +8,7 @@
  */
 (() => {
   'use strict';
-  const {HttpServer, Log} = require('@aliceo2/web-ui');
+  const {HttpServer} = require('@aliceo2/web-ui');
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
   const logEntry = require('./models/log_entries');
@@ -61,7 +61,7 @@
       const filePath = result.saved_file_path;
       res.download(filePath, ((err) => {
         if (err) {
-          Log.error(err);
+          errorHandling(res, err);
         }
       }));
     }).catch((error) => {

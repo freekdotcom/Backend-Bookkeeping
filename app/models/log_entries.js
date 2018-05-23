@@ -40,7 +40,7 @@
           result = res.rows;
           callback(result);
           resolve(result);
-        }).catch(() => reject('The entry does not exist'));
+        }).catch(() => reject('The entry does not exist', 404));
       });
     }
 
@@ -59,8 +59,8 @@
           result = res.rows[0];
           callback(result);
           resolve(result);
-        }).catch((ex) => {
-          reject('The file cannot be found. The error is: ' + ex);
+        }).catch(() => {
+          reject('The file cannot be found.', 404);
         });
       });
     }
@@ -104,7 +104,8 @@
             result = 'Entry has been added to the database';
             callback(result);
             resolve(result);
-          }).catch((ex) => reject('The entry could not be added. Cause: ' + ex));
+          }).catch((ex) => reject('The entry could not be added to the system. Cause: '
+            + ex, 500));
       });
     }
 
@@ -116,7 +117,7 @@
     async postFileEntry(callback) {
       let result = null;
       const filePath = await this.filePlacement()
-        .catch((ex) => callback(ex));
+        .catch(() => 'error with uploading the file.');
       const postLogEntryFileQuery = {
         name: 'post-file-log-entry',
         text: 'UPDATE log_entry SET saved_file_path=($1) WHERE run_id=($2)',
@@ -128,7 +129,9 @@
             result = 'Filepath has been added to the database';
             callback(result);
             resolve(result);
-          }).catch((ex) => reject('File could not be uploaded. Cause: ' + ex));
+          }).catch((ex) =>{
+            reject('File could not be uploaded. Cause: ' + ex, 500);
+          });
       });
     }
 
@@ -142,10 +145,12 @@
         mkdirp(newFilePath, (err) => {
           if (err) {
             reject('Could not move file. Cause: ' + err);
-            fs.unlink(this.req.file.path);
+            // fs.unlink(this.req.file.path);
           }
           fs.rename(this.req.file.path, newFilePath + this.req.file.originalname);
           resolve(newFilePath);
+        }).catch((ex) => {
+          reject('Error with uploading the file. Cause: ' + ex);
         });
       });
     }

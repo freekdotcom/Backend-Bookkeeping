@@ -8,7 +8,7 @@
  */
 (() => {
   'use strict';
-  const {HttpServer} = require('@aliceo2/web-ui');
+  const {HttpServer, Log} = require('@aliceo2/web-ui');
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
   const logEntry = require('./models/log_entries');
@@ -29,13 +29,16 @@
   //   res.setHeader('Access-Control-Allow-Credentials', true);
   // }
   //
+
   /**
    * Handles any error related to the end-points
    * @param  {res} res    the response
    * @param  {error} error the rejected promise
+   * @param {integer} errorCode The error code
    */
-  function errorHandling(res, error) {
-    res.status(400);
+  function errorHandling(res, error, errorCode) {
+    Log.error(error);
+    res.status(errorCode);
     res.send(error);
   }
 
@@ -49,8 +52,8 @@
     single.getSingleLogEntry((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error) => {
-      errorHandling(res, error);
+    }).catch((error, errorCode) => {
+      errorHandling(res, error, errorCode);
     });
   });
 
@@ -61,11 +64,11 @@
       const filePath = result.saved_file_path;
       res.download(filePath, ((err) => {
         if (err) {
-          errorHandling(res, err);
+          errorHandling(res, err, 404);
         }
       }));
-    }).catch((error) => {
-      errorHandling(res, error);
+    }).catch((error, errorCode) => {
+      errorHandling(res, error, errorCode);
     });
   });
 
@@ -76,8 +79,8 @@
     all.getAllEntries((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error) => {
-      errorHandling(res, error);
+    }).catch((error, errorCode) => {
+      errorHandling(res, error, errorCode);
     });
   });
 
@@ -87,8 +90,8 @@
     post.postDataEntry((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error) => {
-      errorHandling(res, error);
+    }).catch((error, errorCode) => {
+      errorHandling(res, error, errorCode);
     });
   });
 
@@ -98,9 +101,9 @@
     postFile.postFileEntry((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error) => {
+    }).catch((error, errorCode) => {
       fs.unlink(req.file.path);
-      errorHandling(res, error);
+      errorHandling(res, error, errorCode);
     });
   });
 
@@ -109,8 +112,8 @@
     const postUser = new user.User(req);
     postUser.postUserAuthentication((result) => {
       res.send(result);
-    }).catch((error) => {
-      errorHandling(res, error);
+    }).catch((error, errorCode) => {
+      errorHandling(res, error, errorCode);
     });
   });
 })();

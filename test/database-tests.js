@@ -58,7 +58,6 @@ describe('Database', () => {
     });
   });
 
-
   after(() => {
     database.getClient().end();
   });

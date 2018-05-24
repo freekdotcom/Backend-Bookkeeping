@@ -7,9 +7,9 @@
  *
  */
 
-// const logEntry = require('../app/models/log_entries');
 const Database = require('../app/database/database.js').Database;
 const {Log} = require('@aliceo2/web-ui');
+Log.configure({winston: {file: 'error.log'}});
 const mocks = require('node-mocks-http');
 const chai = require('chai');
 const expect = chai.expect;

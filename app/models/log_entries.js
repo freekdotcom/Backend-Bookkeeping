@@ -60,7 +60,7 @@
           callback(result);
           resolve(result);
         }).catch(() => {
-          reject('The file cannot be found.', 404);
+          reject(['The file cannot be found.', 404]);
         });
       });
     }
@@ -78,7 +78,7 @@
           results = res.rows;
           callback(results);
           resolve(results);
-        }).catch(() => reject('There are no entries in the system.'));
+        }).catch(() => reject(['There are no entries in the system.', 404]));
       });
     }
 
@@ -104,8 +104,8 @@
             result = 'Entry has been added to the database';
             callback(result);
             resolve(result);
-          }).catch((ex) => reject('The entry could not be added to the system. Cause: '
-            + ex, 500));
+          }).catch((ex) => reject(['The entry could not be added to the system. Cause: '
+            + ex, 500]));
       });
     }
 
@@ -130,7 +130,7 @@
             callback(result);
             resolve(result);
           }).catch((ex) =>{
-            reject('File could not be uploaded. Cause: ' + ex, 500);
+            reject(['File could not be uploaded. Cause: ' + ex, 500]);
           });
       });
     }

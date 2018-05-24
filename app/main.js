@@ -9,6 +9,7 @@
 (() => {
   'use strict';
   const {HttpServer, Log} = require('@aliceo2/web-ui');
+  Log.configure({winston: {file: 'error.log'}});
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
   const logEntry = require('./models/log_entries');
@@ -17,6 +18,7 @@
   const fs = require('fs');
 
   /**
+   * $argon2i$v=19$m=4096,t=3,p=1$IrxuftDPRR4QAwPhR6klTQ$k2GkaGVO3w6257npdy2jWhkBbVTcmqZ5S4C/DIPYQLk
    * TODO : Implement once CORS works
    * sets the headers for CORS
    * @param  {response} res    Response
@@ -52,8 +54,8 @@
     single.getSingleLogEntry((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error, errorCode) => {
-      errorHandling(res, error, errorCode);
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
     });
   });
 
@@ -64,11 +66,11 @@
       const filePath = result.saved_file_path;
       res.download(filePath, ((err) => {
         if (err) {
-          errorHandling(res, err, 404);
+          // errorHandling(res, err, 404);
         }
       }));
-    }).catch((error, errorCode) => {
-      errorHandling(res, error, errorCode);
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
     });
   });
 
@@ -79,8 +81,8 @@
     all.getAllEntries((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error, errorCode) => {
-      errorHandling(res, error, errorCode);
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
     });
   });
 
@@ -90,8 +92,8 @@
     post.postDataEntry((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error, errorCode) => {
-      errorHandling(res, error, errorCode);
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
     });
   });
 
@@ -101,9 +103,9 @@
     postFile.postFileEntry((result) => {
       result = view.render(result);
       res.send(result);
-    }).catch((error, errorCode) => {
+    }).catch((error) => {
       fs.unlink(req.file.path);
-      errorHandling(res, error, errorCode);
+      errorHandling(res, error[0], error[1]);
     });
   });
 
@@ -112,8 +114,8 @@
     const postUser = new user.User(req);
     postUser.postUserAuthentication((result) => {
       res.send(result);
-    }).catch((error, errorCode) => {
-      errorHandling(res, error, errorCode);
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
     });
   });
 })();

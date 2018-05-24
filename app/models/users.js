@@ -2,7 +2,7 @@
  * @Author: Frederick van der Meulen
  * @Date:   2018-04-24 09:20:44
  * @Last Modified by:   Frederick van der Meulen
- * @Last Modified time: 2018-05-09 10:05:10
+ * @Last Modified time: 2018-05-24 13:34:00
  */
 (() => {
   'use strict';
@@ -33,19 +33,19 @@
      */
     postUserAuthentication(callback) {
       let result = undefined;
-      const userAuthenticationQuery = 'SELECT * FROM users.users WHERE email = $1';
+      const userAuthenticationQuery = 'SELECT user FROM users.users WHERE email = $1';
       const userAuthenticationQueryValues = [this.req.body.email];
       return new Promise((resolve, reject) => {
         if (this.req.body.email == undefined ||
           this.req.body.password == undefined) {
-          reject('No email address or password is filled in. Please try again.');
+          reject(['No email address or password is filled in. Please try again.', 403]);
         }
 
         database.getClient().query(userAuthenticationQuery,
           userAuthenticationQueryValues).then((res) => {
           result = res.rows;
           if (result[0].password == undefined) {
-            reject('The password or emailaddress is not found. Please try again.');
+            reject(['The password or emailaddress could not be found. Please try again.', 403]);
           }
           argon2.verify(result[0].password, this.req.body.password).then((match) => {
             if (match) {
@@ -53,17 +53,16 @@
               callback(token);
               resolve(token);
             } else {
-              reject('The password or emailaddress is not found. Please try again');
+              reject(['The password or emailaddress could not be found. Please try again', 403]);
             }
           }).catch((err) => {
             Log.error('Internal failure. Cause: ' + err);
-            throw (err);
+            reject('Internal failure. Cause: ' + err, 500);
           });
         }).catch((err) => {
-          throw (err);
+          Log.error('Internal failure. Cause: ' + err);
+          reject('Internal failure. Cause: ' + err, 500);
         });
-      }).catch((err) => {
-        throw (err);
       });
     }
   }

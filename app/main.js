@@ -15,22 +15,6 @@
   const logEntry = require('./models/log_entries');
   const view = require('./views/log_entries');
   const user = require('./models/users');
-  const fs = require('fs');
-
-  /**
-   * $argon2i$v=19$m=4096,t=3,p=1$IrxuftDPRR4QAwPhR6klTQ$k2GkaGVO3w6257npdy2jWhkBbVTcmqZ5S4C/DIPYQLk
-   * TODO : Implement once CORS works
-   * sets the headers for CORS
-   * @param  {response} res    Response
-   * @param  {string} method The method used for CORS
-   */
-  // function setheaders(res, method) {
-  //   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
-  //   res.setHeader('Access-Control-Allow-Methods', method);
-  //   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  //   res.setHeader('Access-Control-Allow-Credentials', true);
-  // }
-  //
 
   /**
    * Handles any error related to the end-points
@@ -66,7 +50,7 @@
       const filePath = result.saved_file_path;
       res.download(filePath, ((err) => {
         if (err) {
-          // errorHandling(res, err, 404);
+          res.send('File was corrupted.');
         }
       }));
     }).catch((error) => {
@@ -104,7 +88,6 @@
       result = view.render(result);
       res.send(result);
     }).catch((error) => {
-      fs.unlink(req.file.path);
       errorHandling(res, error[0], error[1]);
     });
   });

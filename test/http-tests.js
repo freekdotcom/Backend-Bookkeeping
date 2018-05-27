@@ -24,8 +24,9 @@ describe('REST API', () => {
     httpServer = new HttpServer(config.getServerConfiguration(),
       config.getJsonWebTokenConfiguration());
     httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
-    httpServer.get('/get-file', (req, res) => res.download('uploads/daq/foo.txt'));
+    httpServer.get('/get-file', (req, res) => res.download('uploads/daq/5/foo.txt'));
     httpServer.get('/get-bad-file', (req, res) => res.download('uploads/das/foo.txt'));
+    httpServer.post('/post-file', (req, res) => res.json({ok: 1}));
   });
 
   it('should retrieve the user details when "/" is used', (done) => {

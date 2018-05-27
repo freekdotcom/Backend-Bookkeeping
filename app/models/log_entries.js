@@ -12,6 +12,7 @@
   const database = Database.getInstance();
   const fs = require('fs');
   const mkdirp = require('mkdirp');
+  const {Log} = require('@aliceo2/web-ui');
 
   /**
    * The log entry model
@@ -141,17 +142,23 @@
      */
     filePlacement() {
       return new Promise((resolve, reject) => {
-        const newFilePath = 'uploads/';
+        const newFilePath = 'uploads/files/';
         mkdirp(newFilePath, (err) => {
           if (err) {
-            reject('Could not move file. Cause: ' + err);
-            // fs.unlink(this.req.file.path);
+            Log.error(err);
+            reject(['Could not move file. Cause: ' + err, 202]);
           }
-          fs.rename(this.req.file.path, newFilePath + this.req.file.originalname);
-          resolve(newFilePath);
-        }).catch((ex) => {
-          reject('Error with uploading the file. Cause: ' + ex);
+          let newFile = newFilePath + this.req.file.originalname;
+          fs.rename(this.req.file.path, newFile, (err) => {
+            if (err) {
+              Log.error(err);
+              reject(['Error with uploading the file. Cause: ' + err, 202]);
+            }
+          });
+          resolve(newFile);
         });
+      }).catch((ex) => {
+        Log.error(ex);
       });
     }
   }

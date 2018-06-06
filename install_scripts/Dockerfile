@@ -19,6 +19,10 @@ RUN npm install
 #Expose API port to the outside world
 EXPOSE 8080
 
+#Run the database script
+RUN ls
+RUN bash ./database_script.sh
+
 #Launch the application with sudo docker build - < Dockerfile
 RUN npm start
 

@@ -10,9 +10,6 @@ RUN git clone https://github.com/SoftwareForScience/Backend-Bookkeeping.git
 #Change the Working directory
 WORKDIR /Backend-Bookkeeping
 
-#Switch to the development branch
-RUN git checkout origin/develop
-
 #Install the dependencies
 RUN npm install
 
@@ -21,7 +18,7 @@ EXPOSE 8080
 
 #Run the database script
 RUN ls
-RUN bash ./database_script.sh
+RUN bash ./install_scripts/database_script.sh
 
 #Launch the application with sudo docker build - < Dockerfile
 RUN npm start

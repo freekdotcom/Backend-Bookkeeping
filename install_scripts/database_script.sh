@@ -1,10 +1,9 @@
 # @Author: Frederick van der Meulen
 # @Date:   2018-05-29 09:53:42
 # @Last Modified by:   Frederick van der Meulen
-# @Last Modified time: 2018-06-07 10:49:16
+# @Last Modified time: 2018-06-07 11:35:35
 
-apt-get install postgres
-
+apt-get install postgresql postgresql-contrib
 -u postgres psql
 
 CREATE ROLE (naam) WITH [LOGIN, ADMIN];

@@ -1,9 +1,9 @@
 # @Author: Frederick van der Meulen
 # @Date:   2018-05-29 09:53:42
 # @Last Modified by:   Frederick van der Meulen
-# @Last Modified time: 2018-06-07 13:22:18
+# @Last Modified time: 2018-06-07 13:26:29
 
-CREATE ROLE (sfsdeveloper) WITH [LOGIN, ADMIN];
+CREATE ROLE sfsdeveloper WITH [LOGIN, ADMIN];
 \q
 
 createdb cern

@@ -73,7 +73,9 @@
      */
     getAllEntries(callback) {
       let results = null;
-      const getAllEntriesQuery = 'SELECT log_entry FROM log_entry';
+      const getAllEntriesQuery = 'SELECT run_id, created, '+
+      'subsystem, class, type, run, author, title, log_entry_text,'+
+      ' follow_ups, saved_file_path, quality_flag FROM log_entry';
       return new Promise((resolve, reject) => {
         database.getClient().query(getAllEntriesQuery).then((res) => {
           results = res.rows;

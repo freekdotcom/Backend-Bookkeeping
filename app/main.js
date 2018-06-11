@@ -13,7 +13,7 @@
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
   const logEntry = require('./models/log_entries');
-  const view = require('./views/log_entries');
+  // const view = require('./views/log_entries');
   const user = require('./models/users');
 
   /**
@@ -36,7 +36,7 @@
   httpServer.get('/single/entry/:id', (req, res) => {
     const single = new logEntry.LogEntries(req);
     single.getSingleLogEntry((result) => {
-      result = view.render(result);
+      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -63,7 +63,7 @@
   httpServer.get('/all/entries', (req, res) => {
     const all = new logEntry.LogEntries(req);
     all.getAllEntries((result) => {
-      result = view.render(result);
+      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -74,7 +74,7 @@
   httpServer.post('/post/entry/data', (req, res) => {
     const post = new logEntry.LogEntries(req);
     post.postDataEntry((result) => {
-      result = view.render(result);
+      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -85,7 +85,7 @@
   httpServer.post('/upload/:id', (req, res) => {
     const postFile = new logEntry.LogEntries(req);
     postFile.postFileEntry((result) => {
-      result = view.render(result);
+      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);

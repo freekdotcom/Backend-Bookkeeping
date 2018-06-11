@@ -3,15 +3,6 @@
 # @Last Modified by:   Frederick van der Meulen
 # @Last Modified time: 2018-06-06 15:06:33
 
-#apt-get install postgres
-
-sudo -u postgres psql
-
-CREATE ROLE (naam) WITH [LOGIN, ADMIN];
-\q
-
-createdb cern
-psql cern
 
 CREATE TABLE log_entry(
 	run_id SERIAL PRIMARY KEY,

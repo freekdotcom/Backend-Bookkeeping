@@ -16,7 +16,7 @@
   // const view = require('./views/log_entries');
   const user = require('./models/users');
   const regex = RegExp('^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF|jpeg|JPEG|txt|TXT|png|PNG)$');
-
+  const fs = require('fs');
   /**
    * Handles any error related to the end-points
    * @param  {res} res    the response
@@ -87,6 +87,7 @@
   // configuration?
   httpServer.post('/upload/:id', (req, res) => {
     if (!regex.test(req.file.originalname)) {
+      fs.unlinkSync(req.file.path);
       errorHandling(res, 'The file extension is not allowed', 403);
     }
     const postFile = new logEntry.LogEntries(req);

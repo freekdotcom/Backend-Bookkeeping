@@ -15,6 +15,7 @@
   const logEntry = require('./models/log_entries');
   // const view = require('./views/log_entries');
   const user = require('./models/users');
+  const regex = RegExp('^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF|jpeg|JPEG|txt|TXT|png|PNG)$');
 
   /**
    * Handles any error related to the end-points
@@ -25,7 +26,7 @@
   function errorHandling(res, error, errorCode) {
     Log.error(error);
     res.status(errorCode);
-    res.send(error);
+    res.end(error);
   }
 
   let httpServer = new HttpServer(config.getServerConfiguration(),
@@ -81,8 +82,13 @@
     });
   });
 
-  // Posts a file.
+  // Test if the file is allowed to be uploaded and uploads
+  // the file if the file is allowed. TODO, set this in the
+  // configuration?
   httpServer.post('/upload/:id', (req, res) => {
+    if (!regex.test(req.file.originalname)) {
+      errorHandling(res, 'The file extension is not allowed', 403);
+    }
     const postFile = new logEntry.LogEntries(req);
     postFile.postFileEntry((result) => {
       // result = view.render(result);

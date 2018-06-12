@@ -52,7 +52,9 @@
      */
     getSingleLogEntryFile(callback) {
       let result = null;
-      const getSingleLogFileQuery = 'SELECT saved_file_path FROM log_entry WHERE run_id = $1';
+      const getSingleLogFileQuery = 'SELECT run_id, created, '+
+      'subsystem, class, type, run, author, title, log_entry_text,'+
+      ' follow_ups, saved_file_path, quality_flag FROM log_entry WHERE run_id = $1';
       const getSingleLogFileValues = [this.req.params.id];
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogFileQuery,

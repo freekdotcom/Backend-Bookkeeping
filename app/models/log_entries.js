@@ -96,7 +96,7 @@
       let result = null;
       const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
         'type, run, author, title, log_entry_text, follow_ups) values ' +
-        '($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+        '($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING run_id';
       const postLogEntryDataValues = [this.req.body.created,
         this.req.body.subsystem, this.req.body.class,
         this.req.body.type, this.req.body.run, this.req.body.author,
@@ -105,8 +105,10 @@
       ];
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
-          .then(() => {
-            result = 'Entry has been added to the database';
+          .then((res) => {
+            //result = 'Entry has been added to the database';
+            result = res.rows;
+            console.log(result)
             callback(result);
             resolve(result);
           }).catch((ex) => reject(['The entry could not be added to the system. Cause: '

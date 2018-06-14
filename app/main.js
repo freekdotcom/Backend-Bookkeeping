@@ -15,7 +15,7 @@
   const logEntry = require('./models/log_entries');
   // const view = require('./views/log_entries');
   const user = require('./models/users');
-  const regex = RegExp('^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF|jpeg|JPEG|txt|TXT|png|PNG)$');
+  const regex = /'^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF|jpeg|JPEG|txt|TXT|png|PNG)$'/;
   const fs = require('fs');
   /**
    * Handles any error related to the end-points
@@ -31,7 +31,6 @@
 
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
-
 
   // Gets a single entry from the database
   httpServer.get('/single/entry/:id', (req, res) => {
@@ -107,5 +106,10 @@
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
     });
+  });
+
+  // Bad path handler, instead of a HTML page
+  httpServer.get('/*', (req, res) => {
+    errorHandling(res, 'Bad path', 404);
   });
 })();

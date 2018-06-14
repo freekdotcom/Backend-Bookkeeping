@@ -106,9 +106,8 @@
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
           .then((res) => {
-            //result = 'Entry has been added to the database';
+            // result = 'Entry has been added to the database';
             result = res.rows;
-            console.log(result)
             callback(result);
             resolve(result);
           }).catch((ex) => reject(['The entry could not be added to the system. Cause: '

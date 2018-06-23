@@ -95,13 +95,15 @@
     postDataEntry(callback) {
       let result = null;
       const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
-        'type, run, author, title, log_entry_text, follow_ups) values ' +
-        '($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING run_id';
+        'type, run, author, title, log_entry_text, follow_ups, ' +
+        'interruption_duration, intervention_type) values ' +
+        '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
       const postLogEntryDataValues = [this.req.body.created,
         this.req.body.subsystem, this.req.body.class,
         this.req.body.type, this.req.body.run, this.req.body.author,
         this.req.body.title,
-        this.req.body.log_entry_text, this.req.body.followUps
+        this.req.body.log_entry_text, this.req.body.followUps,
+        this.req.body.interruption_duration, this.req.body.intervention_type
       ];
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
@@ -147,7 +149,7 @@
      */
     filePlacement() {
       return new Promise((resolve, reject) => {
-        const newFilePath = 'uploads/files/';
+        const newFilePath = 'upload/' + this.req.params.id + '/';
         mkdirp(newFilePath, (err) => {
           if (err) {
             Log.error(err);

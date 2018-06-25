@@ -53,7 +53,7 @@
      */
     getSingleLogEntryFile(callback) {
       let result = null;
-      const getSingleLogFileQuery = 'SELECT file_path FROM file_paths ' + 
+      const getSingleLogFileQuery = 'SELECT file_path FROM file_paths ' +
       'WHERE log_entry_id = $1';
       const getSingleLogFileValues = [this.req.params.id];
       return new Promise((resolve, reject) => {
@@ -62,7 +62,7 @@
           result = res.rows[0];
           callback(result);
           resolve(result);
-        }).catch((ex) => {
+        }).catch(() => {
           reject(['The file cannot be found.', 404]);
         });
       });

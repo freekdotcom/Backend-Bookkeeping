@@ -110,5 +110,4 @@
   httpServer.get('/*', (req, res) => {
     errorHandling(res, 'Bad path', 404);
   });
-
 })();

@@ -1,7 +1,6 @@
-/*
- * Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
+/* Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
  *
- * This software is distributed under the therms of the
+ * This software is distributed under the terms of the
  * GNU General Public Licence version 3 (GPL) version 3,
  * copied verbatim in the file "LICENSE"
  *
@@ -15,7 +14,7 @@
   const logEntry = require('./models/log_entries');
   // const view = require('./views/log_entries');
   const user = require('./models/users');
-  const regex = /'^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF|jpeg|JPEG|txt|TXT|png|PNG)$'/;
+  const regex = /'^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF)$'/;
   const fs = require('fs');
   /**
    * Handles any error related to the end-points
@@ -47,7 +46,7 @@
   httpServer.get('/single/entry/file/:id', (req, res) => {
     const file = new logEntry.LogEntries(req);
     file.getSingleLogEntryFile((result) => {
-      const filePath = result.saved_file_path;
+      const filePath = result.file_path;
       res.download(filePath, ((err) => {
         if (err) {
           res.send('File was corrupted.');
@@ -85,13 +84,12 @@
   // the file if the file is allowed. TODO, set this in the
   // configuration?
   httpServer.post('/upload/:id', (req, res) => {
-    if (!regex.test(req.file.originalname)) {
+    if (regex.test(req.file.originalname)) {
       fs.unlinkSync(req.file.path);
       errorHandling(res, 'The file extension is not allowed', 403);
     }
     const postFile = new logEntry.LogEntries(req);
     postFile.postFileEntry((result) => {
-      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -112,4 +110,5 @@
   httpServer.get('/*', (req, res) => {
     errorHandling(res, 'Bad path', 404);
   });
+
 })();

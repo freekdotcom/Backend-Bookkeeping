@@ -1,7 +1,6 @@
-/*
- * Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
+/* Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
  *
- * This software is distributed under the therms of the
+ * This software is distributed under the terms of the
  * GNU General Public Licence version 3 (GPL) version 3,
  * copied verbatim in the file "LICENSE"
  *
@@ -54,7 +53,8 @@
      */
     getSingleLogEntryFile(callback) {
       let result = null;
-      const getSingleLogFileQuery = 'SELECT saved_file_path FROM log_entry WHERE run_id = $1';
+      const getSingleLogFileQuery = 'SELECT file_path FROM file_paths ' + 
+      'WHERE log_entry_id = $1';
       const getSingleLogFileValues = [this.req.params.id];
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogFileQuery,
@@ -62,7 +62,7 @@
           result = res.rows[0];
           callback(result);
           resolve(result);
-        }).catch(() => {
+        }).catch((ex) => {
           reject(['The file cannot be found.', 404]);
         });
       });
@@ -125,10 +125,11 @@
     async postFileEntry(callback) {
       let result = null;
       const filePath = await this.filePlacement()
-        .catch(() => 'error with uploading the file.');
+        .catch(() => callback('error with uploading the file.'));
       const postLogEntryFileQuery = {
         name: 'post-file-log-entry',
-        text: 'UPDATE log_entry SET saved_file_path=($1) WHERE run_id=($2)',
+        text: 'INSERT INTO file_paths(file_path, log_entry_id) VALUES ' +
+        '($1, $2)',
         values: [filePath, this.req.params.id]
       };
       return new Promise((resolve, reject) => {

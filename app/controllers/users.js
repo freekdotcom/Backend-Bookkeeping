@@ -1,12 +1,14 @@
-/*
-* @Author: Frederick van der Meulen
-* @Date:   2018-04-04 09:35:57
-* @Last Modified by:   Frederick van der Meulen
-* @Last Modified time: 2018-04-04 10:59:30
-*/
+/* Copyright (C) 2018 Amsterdam University of Applied Sciences (AUAS)
+ *
+ * This software is distributed under the terms of the
+ * GNU General Public Licence version 3 (GPL) version 3,
+ * copied verbatim in the file "LICENSE"
+ *
+ * TODO: Export the http server so that the routes can be put here
+ */
 
-module.exports.controller = ((httpServer) => {
+/* module.exports.controller = ((httpServer) => {
   httpServer.get('/current/user', async (req, res) => {
     res.end('THERE ARE NO USERS DUMMY');
   });
-});
+}); */

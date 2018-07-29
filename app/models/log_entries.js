@@ -7,11 +7,12 @@
  */
 (() => {
   'use strict';
-  const Database = require('./../database/database.js').Database;
+  const Database = require('./../database.js').Database;
   const database = Database.getInstance();
   const fs = require('fs');
   const mkdirp = require('mkdirp');
   const {Log} = require('@aliceo2/web-ui');
+  const dateTime = require('node-datetime');
 
   /**
    * The log entry model
@@ -32,9 +33,10 @@
      */
     async getSingleLogEntry(callback) {
       let result = null;
-      const getSingleLogEntryQuery = 'SELECT run_id, created, '+
+      const getSingleLogEntryQuery = 'SELECT created, '+
       'subsystem, class, type, run, author, title, log_entry_text,'+
-      ' follow_ups, saved_file_path, quality_flag FROM log_entry WHERE run_id = $1';
+      ' follow_ups, saved_file_path, quality_flag, interruption_duration,'
+      'intervention_type FROM log_entry WHERE run_id = $1';
       const getSingleLogEntryValues = [this.req.params.id];
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogEntryQuery,
@@ -42,7 +44,7 @@
           result = res.rows;
           callback(result);
           resolve(result);
-        }).catch(() => reject('The entry does not exist', 404));
+        }).catch((err) => reject(['The entry does not exist. Cause: ' + err, 404]));
       });
     }
 
@@ -63,7 +65,7 @@
           callback(result);
           resolve(result);
         }).catch(() => {
-          reject(['The file cannot be found.', 404]);
+          reject(['The file cannot be found. Cause: ' + err, 404]);
         });
       });
     }
@@ -77,13 +79,14 @@
       let results = null;
       const getAllEntriesQuery = 'SELECT run_id, created, '+
       'subsystem, class, type, run, author, title, log_entry_text,'+
-      ' follow_ups, saved_file_path, quality_flag FROM log_entry';
+      ' follow_ups, saved_file_path, quality_flag, interruption_duration,' + 
+      'intervention_type FROM log_entry ORDER BY run_id';
       return new Promise((resolve, reject) => {
         database.getClient().query(getAllEntriesQuery).then((res) => {
           results = res.rows;
           callback(results);
           resolve(results);
-        }).catch(() => reject(['There are no entries in the system.', 404]));
+        }).catch(() => reject(['There are no entries in the system. Cause: ' + err, 404]));
       });
     }
 
@@ -92,13 +95,14 @@
      * @param  {Function} callback [description]
      * @return {[type]}            [description]
      */
-    postDataEntry(callback) {
+    async postDataEntry(callback) {
       let result = null;
+      let createdTime = await this.getCurrentTime();
       const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
         'type, run, author, title, log_entry_text, follow_ups, ' +
         'interruption_duration, intervention_type) values ' +
         '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
-      const postLogEntryDataValues = [this.req.body.created,
+      const postLogEntryDataValues = [createdTime,
         this.req.body.subsystem, this.req.body.class,
         this.req.body.type, this.req.body.run, this.req.body.author,
         this.req.body.title,
@@ -142,6 +146,22 @@
             reject(['File could not be uploaded. Cause: ' + ex, 500]);
           });
       });
+    }
+
+    /**
+     * Returns the current time the log entry is created.
+     * @return {String} The time and year as a string.
+     */
+    getCurrentTime(){
+      return new Promise((resolve, reject) => {
+        const dt = dateTime.create();
+        const formatted = dt.format('Y-m-d H:M:S');
+        resolve(formatted);
+      }).catch((ex) => {
+        Log.error('Time could not be retrieved. Cause: ' + ex);
+        reject(['Time could not be retrieved. Cause: ' + ex, 500])
+      })
+      
     }
 
     /**

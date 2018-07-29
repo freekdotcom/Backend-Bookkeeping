@@ -7,7 +7,7 @@
  */
 (() => {
   'use strict';
-  const Database = require('./../database/database.js').Database;
+  const Database = require('./../database.js').Database;
   const database = Database.getInstance();
   const {JwtToken, Log} = require('@aliceo2/web-ui');
   const Config = require('./../configuration_files/Config.js').Config;

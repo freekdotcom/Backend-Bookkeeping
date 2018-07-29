@@ -16,8 +16,10 @@
   const user = require('./models/users');
   const regex = /'^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF)$'/;
   const fs = require('fs');
+
   /**
-   * Handles any error related to the end-points
+   * Handles any error related to the end-points.
+   * Returns an JSON object with the error message and error code.
    * @param  {res} res    the response
    * @param  {error} error the rejected promise
    * @param {integer} errorCode The error code
@@ -25,8 +27,24 @@
   function errorHandling(res, error, errorCode) {
     Log.error(error);
     res.status(errorCode);
-    res.end(error);
+    const resArray = [];
+    const JsonErrorMessage = ({
+      error_code : errorCode,
+      error_message : error
+    })
+    resArray.push(JsonErrorMessage);
+    res.send(resArray);
   }
+
+  // Checks if the server is not being run in root, and if it is run in root,
+  // changes the UID of the process.
+  const uId = parseInt(process.env.SUDO_UID);
+  if (uId) {
+    process.setuid(uId);
+    Log.debug('Server\'s UID is now ' + process.getuid());
+  } else {
+    Log.debug('Server\'s UID is not root.');
+  } 
 
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
@@ -35,9 +53,9 @@
   httpServer.get('/single/entry/:id', (req, res) => {
     const single = new logEntry.LogEntries(req);
     single.getSingleLogEntry((result) => {
-      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
+      console.log(error[1]);
       errorHandling(res, error[0], error[1]);
     });
   });
@@ -62,7 +80,6 @@
   httpServer.get('/all/entries', (req, res) => {
     const all = new logEntry.LogEntries(req);
     all.getAllEntries((result) => {
-      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -73,7 +90,6 @@
   httpServer.post('/post/entry/data', (req, res) => {
     const post = new logEntry.LogEntries(req);
     post.postDataEntry((result) => {
-      // result = view.render(result);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);

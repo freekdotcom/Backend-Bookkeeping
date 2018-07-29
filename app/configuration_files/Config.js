@@ -11,19 +11,34 @@ const Config = (() => {
   let instance;
 
   function privateInit() {
-    const config = require('./config.json');
+    const {Log} = require('@aliceo2/web-ui');
+    const config = require('/etc/jiskerfet/jiskerfet-api/config.json');
 
     return {
       getDatabaseConfiguration: () => {
+        if(config.databaseIP == null){
+          Log.error('The database IP could not be found.')
+        }
         return config.databaseIP;
       },
 
       getServerConfiguration: () => {
+        if(config.httpConf == null){
+          Log.error('The server configuration could not be found.')
+        }
+        const args = process.argv.slice(2);
+        config.httpConf.port = args[0];
+        if(args[0] == null){
+          config.httpConf.port = 8080;
+        }
       	return config.httpConf;
       },
 
       getJsonWebTokenConfiguration: () => {
-      	return config.jwtConf;
+      	if(config.jwtConf == null){
+          Log.error('The JSON Web Token configuration could not be found.')
+        }
+        return config.jwtConf;
       }
     };
   }

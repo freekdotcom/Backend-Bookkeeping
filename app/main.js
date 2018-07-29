@@ -49,18 +49,33 @@
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
 
-  // Gets a single entry from the database
-  httpServer.get('/single/entry/:id', (req, res) => {
+  httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
+    Object.keys(req.params)
+      .forEach(key => req.params[key] === undefined && delete req.params[key]) 
+    const entries = new logEntry.LogEntries(req);
+    entries.getEntries((result) => {
+      res.send(result);
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
+    });
+  });
+  
+  httpServer.get('/:logEntryId/file', (req, res) => {
+  
+  });
+
+  //Gets a single entry from the database
+  httpServer.get('/:logEntryId', (req, res) => {
     const single = new logEntry.LogEntries(req);
     single.getSingleLogEntry((result) => {
       res.send(result);
     }).catch((error) => {
-      console.log(error[1]);
       errorHandling(res, error[0], error[1]);
     });
   });
 
   // Gets a single file from an entry from the database
+  /*
   httpServer.get('/single/entry/file/:id', (req, res) => {
     const file = new logEntry.LogEntries(req);
     file.getSingleLogEntryFile((result) => {
@@ -74,17 +89,7 @@
       errorHandling(res, error[0], error[1]);
     });
   });
-
-
-  // Gets all the entries from the database
-  httpServer.get('/all/entries', (req, res) => {
-    const all = new logEntry.LogEntries(req);
-    all.getAllEntries((result) => {
-      res.send(result);
-    }).catch((error) => {
-      errorHandling(res, error[0], error[1]);
-    });
-  });
+  */
 
   // Posts an entry with all the data
   httpServer.post('/post/entry/data', (req, res) => {
@@ -94,6 +99,10 @@
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
     });
+  });
+
+  httpServer.get('/:logEntryId/upload', (req, res) => {
+
   });
 
   // Test if the file is allowed to be uploaded and uploads

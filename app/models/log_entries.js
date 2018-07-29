@@ -35,9 +35,9 @@
       let result = null;
       const getSingleLogEntryQuery = 'SELECT created, '+
       'subsystem, class, type, run, author, title, log_entry_text,'+
-      ' follow_ups, saved_file_path, quality_flag, interruption_duration,'
-      'intervention_type FROM log_entry WHERE run_id = $1';
-      const getSingleLogEntryValues = [this.req.params.id];
+      ' follow_ups, quality_flag, interruption_duration,' +
+      'intervention_type FROM log_entry WHERE log_entry_id = $1';
+      const getSingleLogEntryValues = [this.req.params.logEntryId];
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogEntryQuery,
           getSingleLogEntryValues).then((res) => {
@@ -57,7 +57,7 @@
       let result = null;
       const getSingleLogFileQuery = 'SELECT file_path FROM file_paths ' +
       'WHERE log_entry_id = $1';
-      const getSingleLogFileValues = [this.req.params.id];
+      const getSingleLogFileValues = [this.req.params.logEntryId];
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogFileQuery,
           getSingleLogFileValues).then((res) => {
@@ -70,17 +70,38 @@
       });
     }
 
+    getEntries(callback) {
+      let results = null;
+      console.log(this.req.params);
+      const getEntriesQuery = 'SELECT log_entry_id, created, '+
+      'subsystem, class, type, run, author, title, log_entry_text,'+
+      'follow_ups, quality_flag, interruption_duration,' + 
+      'intervention_type FROM log_entry WHERE run = $1 AND subsystem = $2 OR  '+
+      'author = $3 OR type = $4 ORDER BY log_entry_id';
+      const getEntriesParameters = [this.req.params.runId, this.req.params.subsystem, 
+      this.req.params.user, this.req.params.type];
+      return new Promise((resolve, reject) => {
+        database.getClient().query(getEntriesQuery, getEntriesParameters).then((res) => {
+          results = res.rows;
+          callback(results);
+          resolve(results);
+        }).catch((err) => reject(['Could not retrieve the entries. Cause: ' + err, 404]));
+      });
+
+    }
+
     /**
      * [getAllEntries description]
      * @param  {Function} callback [description]
      * @return {array}            returns a single log entry
      */
+    /*
     getAllEntries(callback) {
       let results = null;
-      const getAllEntriesQuery = 'SELECT run_id, created, '+
+      const getAllEntriesQuery = 'SELECT log_entry_id, created, '+
       'subsystem, class, type, run, author, title, log_entry_text,'+
       ' follow_ups, saved_file_path, quality_flag, interruption_duration,' + 
-      'intervention_type FROM log_entry ORDER BY run_id';
+      'intervention_type FROM log_entry ORDER BY log_entry_id';
       return new Promise((resolve, reject) => {
         database.getClient().query(getAllEntriesQuery).then((res) => {
           results = res.rows;

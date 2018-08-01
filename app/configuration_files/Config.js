@@ -14,17 +14,21 @@ const Config = (() => {
     const {Log} = require('@aliceo2/web-ui');
     const config = require('/etc/jiskerfet/jiskerfet-api/config.json');
 
+    if(config == null | config == undefined){
+      Log.error('The configuration file could not be found.')
+    }
+
     return {
       getDatabaseConfiguration: () => {
         if(config.databaseIP == null){
-          Log.error('The database IP could not be found.')
+          Log.error('The database IP could not be found.');
         }
         return config.databaseIP;
       },
 
       getServerConfiguration: () => {
         if(config.httpConf == null){
-          Log.error('The server configuration could not be found.')
+          Log.error('The server configuration could not be found.');
         }
         const args = process.argv.slice(2);
         config.httpConf.port = args[0];
@@ -36,7 +40,7 @@ const Config = (() => {
 
       getJsonWebTokenConfiguration: () => {
       	if(config.jwtConf == null){
-          Log.error('The JSON Web Token configuration could not be found.')
+          Log.error('The JSON Web Token configuration could not be found.');
         }
         return config.jwtConf;
       }

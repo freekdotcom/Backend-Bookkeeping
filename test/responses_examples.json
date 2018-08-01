@@ -1,0 +1,63 @@
+[
+    {
+        "log_entry_id": 1,
+        "created": "2018:07:29 10:56:26",
+        "subsystem": "DAQ",
+        "class": "MACHINE",
+        "type": "RUN",
+        "run": "1",
+        "author": "ALICE",
+        "title": "Lorem ipsum",
+        "log_entry_text": "Lorem ipsum mipsum kliksum",
+        "follow_ups": "lorum ipsums",
+        "quality_flag": "5",
+        "interruption_duration": "00:26:38",
+        "intervention_type": "EMERGENCY"
+    },
+    {
+        "log_entry_id": 2,
+        "created": "2018:07:29 10:56:26",
+        "subsystem": "DAQ",
+        "class": "HUMAN",
+        "type": "EOS",
+        "run": "1",
+        "author": "Guus",
+        "title": "Test Values",
+        "log_entry_text": "Lorem ipsum mipsum kliksum",
+        "follow_ups": "lorum ipsums",
+        "quality_flag": null,
+        "interruption_duration": null,
+        "intervention_type": null
+    },
+    {
+    	"log_entry_id" : 3,
+    	"created" : "2018:07:29 16:27:59",
+    	"subsystem" : "HLT",
+    	"class" : "HUMAN",
+    	"type": "EOS",
+    	"run": "2",
+        "author": "Johan",
+        "title": "Test Values",
+        "log_entry_text": "Lorem ipsum mipsum kliksum",
+        "follow_ups": "lorum ipsums",
+        "quality_flag": "4",
+        "interruption_duration": null,
+        "intervention_type": null
+
+    },
+    {
+        "log_entry_id" : 4,
+    	"created" : "2018:07:29 16:27:59",
+    	"subsystem" : "HLT",
+    	"class" : "HUMAN",
+    	"type": "EOS",
+    	"run": "2",
+        "author": "Johan",
+        "title": "Test Values",
+        "log_entry_text": "Lorem ipsum mipsum kliksum",
+        "follow_ups": "lorum ipsums",
+        "quality_flag": "2",
+        "interruption_duration": null,
+        "intervention_type": null	
+    }
+]

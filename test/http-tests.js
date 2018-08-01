@@ -10,70 +10,87 @@
 
 const {HttpServer, JwtToken} = require('@aliceo2/web-ui');
 const assert = require('assert');
-const http = require('http');
-const url = require('url');
+const request = require('request');
+const _ = require('underscore');
 const Config = require('../app/configuration_files/Config.js').Config;
 const config = Config.getInstance();
+const responseExamples = require('./responses_examples.json');
 
 let httpServer;
 const jwt = new JwtToken(config.getJsonWebTokenConfiguration());
 const token = jwt.generateToken(0, 'test', 1);
 
-describe('REST API', () => {
+/**
+ * Test function to see how the error message method works
+ * @param  {[type]} res       [description]
+ * @param  {[type]} error     [description]
+ * @param  {[type]} errorCode [description]
+ */
+function errorHandling(res, error, errorCode) {
+  res.status(errorCode);
+  const resArray = [];
+  const JsonErrorMessage = ({
+    error_code: errorCode,
+    error_message: error
+  });
+  resArray.push(JsonErrorMessage);
+  res.send(resArray);
+}
+
+describe('REST API TESTS', () => {
   before(() => {
     httpServer = new HttpServer(config.getServerConfiguration(),
       config.getJsonWebTokenConfiguration());
-    httpServer.get('/get-request', (req, res) => res.json({ok: 1}));
-    httpServer.get('/get-file', (req, res) => res.download('uploads/daq/5/foo.txt'));
-    httpServer.get('/get-bad-file', (req, res) => res.download('uploads/das/foo.txt'));
-    httpServer.post('/post-file', (req, res) => res.json({ok: 1}));
-  });
-
-  it('should retrieve the user details when "/" is used', (done) => {
-    http.get('http://localhost:' + config.getServerConfiguration().port +
-      '/', (res) => {
-      assert.strictEqual(res.statusCode, 302);
-      const parsedUrl = new url.URL(res.headers.location, 'http://localhost');
-      parsedUrl.searchParams.has('personid');
-      parsedUrl.searchParams.has('name');
-      parsedUrl.searchParams.has('token');
-      done();
+    httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
+      res.send('JOHAN');
     });
+    httpServer.get('/:logEntryId/file', (req, res) => res.download('uploads/daq/5/foo.txt'));
+    httpServer.get('/:logEntryId', (req, res) => {
+      const filteredResponse = _.where(responseExamples,
+        {'log_entry_id': Number(req.params.logEntryId)});
+      if (filteredResponse === undefined || filteredResponse.length == 0) {
+        errorHandling(res, 'The entry could not be retrieved', 404);
+      } else {
+        res.send(filteredResponse);
+      }
+    });
+    httpServer.post('/run/:runId/:subsystem/:class/:user', (req, res) => res.json({ok: 1}));
+    httpServer.post('/:logEntryId/upload', (req, res) => res.json({ok: 1}));
+    httpServer.post('/login', (req, res) => res.json({ok: 1}));
   });
 
-  it('should give an error when the token has not been given with the request',
-    (done) => {
-      http.get('http://localhost:' + config.getServerConfiguration().port +
-        '/api/get-request', (res) => {
-        assert.strictEqual(res.statusCode, 403);
+  describe('GET end-points', () => {
+    it('should be able to retrieve a single entry based upon ID', (done) => {
+      request('http://localhost:' + config.getServerConfiguration().port
+        + '/api/1?token=' + token, (error, res, body) => {
+        const parsedBody = JSON.parse(body);
+        assert.strictEqual(res.statusCode, 200);
+        assert.strictEqual(parsedBody[0].log_entry_id, 1);
         done();
       });
     });
 
-  it('should let a get request go through', (done) => {
-    http.get('http://localhost:' + config.getServerConfiguration().port +
-      '/api/get-request?token=' + token, (res) => {
-      assert.strictEqual(res.statusCode, 200);
+    it('should return a json with an error message that the log entry does not exist', (done) => {
+      request('http://localhost:' + config.getServerConfiguration().port
+        + '/api/1111?token=' + token, (error, res, body) => {
+        const parsedBody = JSON.parse(body);
+        assert.strictEqual(res.statusCode, 404);
+        assert.strictEqual(parsedBody[0].error_message, 'The entry could not be retrieved');
+      });
+      done();
+    });
+
+    it('should be able to receive the parameters from the URL', (done) => {
+      request('http://localhost:' + config.getServerConfiguration().port +
+        '/api/run/1/Guus?token=' + token, (error, res, body) => {
+        const parsedBody = JSON.parse(body);
+        assert.strictEqual(res.statusCode, 200);
+        assert.strictEqual(parsedBody[0].runId, 1);
+        assert.strictEqual(parsedBody[0].author, 'Guus');
+      });
       done();
     });
   });
-
-  it('should download a file', (done) => {
-    http.get('http://localhost:' + config.getServerConfiguration().port +
-      '/api/get-file?token=' + token, (res) => {
-      assert.strictEqual(res.statusCode, 200);
-      done();
-    });
-  });
-
-  it('should throw an error when the file path is wrong', (done) => {
-    http.get('http://localhost:' + config.getServerConfiguration().port +
-      '/api/get-bad-file?token=' + token, (res) => {
-      assert.strictEqual(res.statusCode, 500);
-      done();
-    });
-  });
-
   after(() => {
     httpServer.getServer.close();
   });

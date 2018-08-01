@@ -31,7 +31,7 @@
      * @param  {Function} callback
      * @return {[type]} returns a single log entry
      */
-    async getSingleLogEntry(callback) {
+    async getLogEntry(callback) {
       let result = null;
       const getSingleLogEntryQuery = 'SELECT created, '+
       'subsystem, class, type, run, author, title, log_entry_text,'+
@@ -44,7 +44,7 @@
           result = res.rows;
           callback(result);
           resolve(result);
-        }).catch((err) => reject(['The entry does not exist. Cause: ' + err, 404]));
+        }).catch((err) => reject(['The entry could not be retrieved. Cause: ' + err, 404]));
       });
     }
 
@@ -53,7 +53,7 @@
      * @param  {Function} callback [description]
      * @return {[type]}            [description]
      */
-    getSingleLogEntryFile(callback) {
+    getLogEntryFile(callback) {
       let result = null;
       const getSingleLogFileQuery = 'SELECT file_path FROM file_paths ' +
       'WHERE log_entry_id = $1';
@@ -64,50 +64,33 @@
           result = res.rows[0];
           callback(result);
           resolve(result);
-        }).catch(() => {
+        }).catch((err) => {
           reject(['The file cannot be found. Cause: ' + err, 404]);
         });
       });
     }
 
+    /**
+     * Retrieves log entries based upon the run and either the subsystem,
+     * author or the type of log entry
+     * @param  {Function} callback Returns the log entry
+     * @return {[type]}            [description]
+     */
     getEntries(callback) {
       let results = null;
-      console.log(this.req.params);
       const getEntriesQuery = 'SELECT log_entry_id, created, '+
       'subsystem, class, type, run, author, title, log_entry_text,'+
-      'follow_ups, quality_flag, interruption_duration,' + 
-      'intervention_type FROM log_entry WHERE run = $1 AND subsystem = $2 OR  '+
+      'follow_ups, quality_flag, interruption_duration,' +
+      'intervention_type FROM log_entry WHERE run = $1 AND subsystem = $2 OR '+
       'author = $3 OR type = $4 ORDER BY log_entry_id';
-      const getEntriesParameters = [this.req.params.runId, this.req.params.subsystem, 
-      this.req.params.user, this.req.params.type];
+      const getEntriesParameters = [this.req.params.runId, this.req.params.subsystem,
+        this.req.params.user, this.req.params.type];
       return new Promise((resolve, reject) => {
         database.getClient().query(getEntriesQuery, getEntriesParameters).then((res) => {
           results = res.rows;
           callback(results);
           resolve(results);
         }).catch((err) => reject(['Could not retrieve the entries. Cause: ' + err, 404]));
-      });
-
-    }
-
-    /**
-     * [getAllEntries description]
-     * @param  {Function} callback [description]
-     * @return {array}            returns a single log entry
-     */
-    /*
-    getAllEntries(callback) {
-      let results = null;
-      const getAllEntriesQuery = 'SELECT log_entry_id, created, '+
-      'subsystem, class, type, run, author, title, log_entry_text,'+
-      ' follow_ups, saved_file_path, quality_flag, interruption_duration,' + 
-      'intervention_type FROM log_entry ORDER BY log_entry_id';
-      return new Promise((resolve, reject) => {
-        database.getClient().query(getAllEntriesQuery).then((res) => {
-          results = res.rows;
-          callback(results);
-          resolve(results);
-        }).catch(() => reject(['There are no entries in the system. Cause: ' + err, 404]));
       });
     }
 
@@ -122,10 +105,10 @@
       const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
         'type, run, author, title, log_entry_text, follow_ups, ' +
         'interruption_duration, intervention_type) values ' +
-        '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
+        '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING log_entry_id';
       const postLogEntryDataValues = [createdTime,
-        this.req.body.subsystem, this.req.body.class,
-        this.req.body.type, this.req.body.run, this.req.body.author,
+        this.req.params.subsystem, this.req.params.class,
+        this.req.body.type, this.req.params.runId, this.req.params.user,
         this.req.body.title,
         this.req.body.log_entry_text, this.req.body.followUps,
         this.req.body.interruption_duration, this.req.body.intervention_type
@@ -173,16 +156,12 @@
      * Returns the current time the log entry is created.
      * @return {String} The time and year as a string.
      */
-    getCurrentTime(){
-      return new Promise((resolve, reject) => {
+    getCurrentTime() {
+      return new Promise((resolve) => {
         const dt = dateTime.create();
         const formatted = dt.format('Y-m-d H:M:S');
         resolve(formatted);
-      }).catch((ex) => {
-        Log.error('Time could not be retrieved. Cause: ' + ex);
-        reject(['Time could not be retrieved. Cause: ' + ex, 500])
-      })
-      
+      });
     }
 
     /**

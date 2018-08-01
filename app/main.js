@@ -29,9 +29,9 @@
     res.status(errorCode);
     const resArray = [];
     const JsonErrorMessage = ({
-      error_code : errorCode,
-      error_message : error
-    })
+      error_code: errorCode,
+      error_message: error
+    });
     resArray.push(JsonErrorMessage);
     res.send(resArray);
   }
@@ -44,14 +44,14 @@
     Log.debug('Server\'s UID is now ' + process.getuid());
   } else {
     Log.debug('Server\'s UID is not root.');
-  } 
+  }
 
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
 
   httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
     Object.keys(req.params)
-      .forEach(key => req.params[key] === undefined && delete req.params[key]) 
+      .forEach((key) => req.params[key] === undefined && delete req.params[key]);
     const entries = new logEntry.LogEntries(req);
     entries.getEntries((result) => {
       res.send(result);
@@ -59,15 +59,25 @@
       errorHandling(res, error[0], error[1]);
     });
   });
-  
+
   httpServer.get('/:logEntryId/file', (req, res) => {
-  
+    const file = new logEntry.LogEntries(req);
+    file.getLogEntryFile((result) => {
+      const filePath = result.file_path;
+      res.download(filePath, ((err) => {
+        if (err) {
+          errorHandling(res, err, 502);
+        }
+      }));
+    }).catch((error) => {
+      errorHandling(res, error[0], error[1]);
+    });
   });
 
-  //Gets a single entry from the database
+  // Gets a single entry from the database
   httpServer.get('/:logEntryId', (req, res) => {
     const single = new logEntry.LogEntries(req);
-    single.getSingleLogEntry((result) => {
+    single.getLogEntry((result) => {
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -77,22 +87,11 @@
   // Gets a single file from an entry from the database
   /*
   httpServer.get('/single/entry/file/:id', (req, res) => {
-    const file = new logEntry.LogEntries(req);
-    file.getSingleLogEntryFile((result) => {
-      const filePath = result.file_path;
-      res.download(filePath, ((err) => {
-        if (err) {
-          res.send('File was corrupted.');
-        }
-      }));
-    }).catch((error) => {
-      errorHandling(res, error[0], error[1]);
-    });
   });
   */
 
   // Posts an entry with all the data
-  httpServer.post('/post/entry/data', (req, res) => {
+  httpServer.post('/run/:runId/:subsystem/:class/:user', (req, res) => {
     const post = new logEntry.LogEntries(req);
     post.postDataEntry((result) => {
       res.send(result);
@@ -101,14 +100,11 @@
     });
   });
 
-  httpServer.get('/:logEntryId/upload', (req, res) => {
-
-  });
 
   // Test if the file is allowed to be uploaded and uploads
   // the file if the file is allowed. TODO, set this in the
   // configuration?
-  httpServer.post('/upload/:id', (req, res) => {
+  httpServer.post('/:logEntryId/upload', (req, res) => {
     if (regex.test(req.file.originalname)) {
       fs.unlinkSync(req.file.path);
       errorHandling(res, 'The file extension is not allowed', 403);
@@ -122,7 +118,7 @@
   });
 
   // Login for the users
-  httpServer.post('/user/login/info', (req, res) => {
+  httpServer.post('/login', (req, res) => {
     const postUser = new user.User(req);
     postUser.postUserAuthentication((result) => {
       res.send(result);

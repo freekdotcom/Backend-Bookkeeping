@@ -12,7 +12,6 @@
   const Config = require('./configuration_files/Config.js').Config;
   const config = Config.getInstance();
   const logEntry = require('./models/log_entries');
-  // const view = require('./views/log_entries');
   const user = require('./models/users');
   const regex = /'^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF)$'/;
   const fs = require('fs');
@@ -49,6 +48,8 @@
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
 
+
+
   httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
     Object.keys(req.params)
       .forEach((key) => req.params[key] === undefined && delete req.params[key]);
@@ -84,16 +85,10 @@
     });
   });
 
-  // Gets a single file from an entry from the database
-  /*
-  httpServer.get('/single/entry/file/:id', (req, res) => {
-  });
-  */
-
   // Posts an entry with all the data
   httpServer.post('/run/:runId/:subsystem/:class/:user', (req, res) => {
     const post = new logEntry.LogEntries(req);
-    post.postDataEntry((result) => {
+    post.postLogEntry((result) => {
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);
@@ -105,12 +100,10 @@
   // the file if the file is allowed. TODO, set this in the
   // configuration?
   httpServer.post('/:logEntryId/upload', (req, res) => {
-    if (regex.test(req.file.originalname)) {
-      fs.unlinkSync(req.file.path);
-      errorHandling(res, 'The file extension is not allowed', 403);
-    }
+    console.log(req);
     const postFile = new logEntry.LogEntries(req);
     postFile.postFileEntry((result) => {
+      res.status(204);
       res.send(result);
     }).catch((error) => {
       errorHandling(res, error[0], error[1]);

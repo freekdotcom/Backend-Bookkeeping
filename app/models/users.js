@@ -50,10 +50,10 @@
           bcrypt.compare(this.req.body.password, result[0].password, (err, res) => {
             if (res) {
               const token = jwt.generateToken(res.id, res.name);
-              callback(token);
-              resolve(token);
+              const JSONToken = ({JWToken: token})
+              callback(JSONToken);
+              resolve(JSONToken);
             } else {
-              Log.error(err);
               reject(['The password or emailaddress could not be found. Please try again', 403]);
             }
           });

@@ -6,8 +6,6 @@
  *
  */
 
-'use strict';
-
 const {HttpServer, JwtToken} = require('@aliceo2/web-ui');
 const assert = require('assert');
 const request = require('request');
@@ -42,7 +40,9 @@ describe('REST API TESTS', () => {
     httpServer = new HttpServer(config.getServerConfiguration(),
       config.getJsonWebTokenConfiguration());
     httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
-      res.send('JOHAN');
+      const params = [req.params.runId, req.params.user];
+
+      res.send(params);
     });
     httpServer.get('/:logEntryId/file', (req, res) => res.download('uploads/daq/5/foo.txt'));
     httpServer.get('/:logEntryId', (req, res) => {
@@ -54,9 +54,6 @@ describe('REST API TESTS', () => {
         res.send(filteredResponse);
       }
     });
-    httpServer.post('/run/:runId/:subsystem/:class/:user', (req, res) => res.json({ok: 1}));
-    httpServer.post('/:logEntryId/upload', (req, res) => res.json({ok: 1}));
-    httpServer.post('/login', (req, res) => res.json({ok: 1}));
   });
 
   describe('GET end-points', () => {
@@ -82,15 +79,17 @@ describe('REST API TESTS', () => {
 
     it('should be able to receive the parameters from the URL', (done) => {
       request('http://localhost:' + config.getServerConfiguration().port +
-        '/api/run/1/Guus?token=' + token, (error, res, body) => {
+        '/api/run/1/u/Guus?token=' + token, (error, res, body) => {
         const parsedBody = JSON.parse(body);
         assert.strictEqual(res.statusCode, 200);
-        assert.strictEqual(parsedBody[0].runId, 1);
-        assert.strictEqual(parsedBody[0].author, 'Guus');
+        assert.strictEqual(parsedBody[0], '1');
+        assert.strictEqual(parsedBody[1], 'Guus');
       });
       done();
     });
+
   });
+
   after(() => {
     httpServer.getServer.close();
   });

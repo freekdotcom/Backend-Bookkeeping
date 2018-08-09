@@ -41,9 +41,13 @@
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogEntryQuery,
           getSingleLogEntryValues).then((res) => {
-          result = res.rows;
-          callback(result);
-          resolve(result);
+          if (res.rows === undefined || res.rows.length == 0) {
+            reject(['No entries were found in the system.', 404]);
+          } else {
+            result = res.rows;
+            callback(result);
+            resolve(result);            
+          }
         }).catch((err) => reject(['The entry could not be retrieved. Cause: ' + err, 404]));
       });
     }
@@ -61,9 +65,14 @@
       return new Promise((resolve, reject) => {
         database.getClient().query(getSingleLogFileQuery,
           getSingleLogFileValues).then((res) => {
-          result = res.rows[0];
+          if (res.rows === undefined || res.rows.length == 0) {
+          reject(['The file cannot be found.', 404]);  
+          } else {
+                      result = res.rows[0];
           callback(result);
           resolve(result);
+
+          }
         }).catch((err) => {
           reject(['The file cannot be found. Cause: ' + err, 404]);
         });
@@ -87,9 +96,13 @@
         this.req.params.user, this.req.params.type];
       return new Promise((resolve, reject) => {
         database.getClient().query(getEntriesQuery, getEntriesParameters).then((res) => {
-          results = res.rows;
-          callback(results);
-          resolve(results);
+          if (res.rows === undefined || res.rows.length == 0) {
+            reject(['No entries were found in the system.', 404]);
+          } else {
+            results = res.rows;
+            callback(results);
+            resolve(results);
+        }
         }).catch((err) => reject(['Could not retrieve the entries. Cause: ' + err, 404]));
       });
     }
@@ -99,7 +112,7 @@
      * @param  {Function} callback [description]
      * @return {[type]}            [description]
      */
-    async postDataEntry(callback) {
+    async postLogEntry(callback) {
       let result = null;
       let createdTime = await this.getCurrentTime();
       const postLogEntryDataQuery = 'INSERT INTO log_entry(created, subsystem, class,' +
@@ -138,7 +151,7 @@
         name: 'post-file-log-entry',
         text: 'INSERT INTO file_paths(file_path, log_entry_id) VALUES ' +
         '($1, $2)',
-        values: [filePath, this.req.params.id]
+        values: [filePath, this.req.params.logEntryId]
       };
       return new Promise((resolve, reject) => {
         database.getClient().query(postLogEntryFileQuery)

@@ -42,11 +42,11 @@
         database.getClient().query(getSingleLogEntryQuery,
           getSingleLogEntryValues).then((res) => {
           if (res.rows === undefined || res.rows.length == 0) {
-            reject(['No entries were found in the system.', 404]);
+            reject(['The entry could not be found within the system.', 404]);
           } else {
             result = res.rows;
             callback(result);
-            resolve(result);            
+            resolve(result);
           }
         }).catch((err) => reject(['The entry could not be retrieved. Cause: ' + err, 404]));
       });
@@ -66,12 +66,11 @@
         database.getClient().query(getSingleLogFileQuery,
           getSingleLogFileValues).then((res) => {
           if (res.rows === undefined || res.rows.length == 0) {
-          reject(['The file cannot be found.', 404]);  
+            reject(['The file cannot be found.', 404]);
           } else {
-                      result = res.rows[0];
-          callback(result);
-          resolve(result);
-
+            result = res.rows[0];
+            callback(result);
+            resolve(result);
           }
         }).catch((err) => {
           reject(['The file cannot be found. Cause: ' + err, 404]);
@@ -102,7 +101,7 @@
             results = res.rows;
             callback(results);
             resolve(results);
-        }
+          }
         }).catch((err) => reject(['Could not retrieve the entries. Cause: ' + err, 404]));
       });
     }
@@ -145,8 +144,8 @@
      */
     async postFileEntry(callback) {
       let result = null;
-      const filePath = await this.filePlacement()
-        .catch(() => callback('error with uploading the file.'));
+      let filePath = await this.filePlacement()
+        .catch(() => filePath = 'error with uploading the file.');
       const postLogEntryFileQuery = {
         name: 'post-file-log-entry',
         text: 'INSERT INTO file_paths(file_path, log_entry_id) VALUES ' +

@@ -48,8 +48,6 @@
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
 
-
-
   httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
     Object.keys(req.params)
       .forEach((key) => req.params[key] === undefined && delete req.params[key]);
@@ -100,7 +98,10 @@
   // the file if the file is allowed. TODO, set this in the
   // configuration?
   httpServer.post('/:logEntryId/upload', (req, res) => {
-    console.log(req);
+    if (regex.test(req.file.originalname)) {
+      fs.unlinkSync(req.file.path);
+      errorHandling(res, 'The file extension is not allowed', 403);
+    }
     const postFile = new logEntry.LogEntries(req);
     postFile.postFileEntry((result) => {
       res.status(204);

@@ -73,8 +73,8 @@ describe('REST API TESTS', () => {
         const parsedBody = JSON.parse(body);
         assert.strictEqual(res.statusCode, 404);
         assert.strictEqual(parsedBody[0].error_message, 'The entry could not be retrieved');
+        done();
       });
-      done();
     });
 
     it('should be able to receive the parameters from the URL', (done) => {
@@ -84,10 +84,18 @@ describe('REST API TESTS', () => {
         assert.strictEqual(res.statusCode, 200);
         assert.strictEqual(parsedBody[0], '1');
         assert.strictEqual(parsedBody[1], 'Guus');
+        done();
       });
-      done();
     });
 
+    it('Should deny access to the application when the token is not present', (done) => {
+      request('http://localhost:' + config.getServerConfiguration().port +
+        '/api/run/1/u/Guus?token=', (error, res, body) => {
+        const parsedBody = JSON.parse(body);
+        assert.strictEqual(parsedBody.message, 'JsonWebTokenError');
+        done();
+      });
+    });
   });
 
   after(() => {

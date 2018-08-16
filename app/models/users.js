@@ -50,7 +50,7 @@
           bcrypt.compare(this.req.body.password, result[0].password, (err, res) => {
             if (res) {
               const token = jwt.generateToken(res.id, res.name);
-              const JSONToken = ({JWToken: token})
+              const JSONToken = ({JWToken: token});
               callback(JSONToken);
               resolve(JSONToken);
             } else {

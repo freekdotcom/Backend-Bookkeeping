@@ -22,6 +22,10 @@ let mockBadPostRequest;
 let mockInjectionPostRequest;
 let mockUserLoginRequest;
 let mockBadUserLoginRequest;
+let mockFiledownloadRequest;
+let mockEvilFileRequest;
+let mockBadFiledownloadRequest;
+let mockGetEntriesRequest;
 
 describe('Database', () => {
   before(() => {
@@ -44,7 +48,7 @@ describe('Database', () => {
     database.getClient().query('DELETE FROM test.file_paths');
     database.getClient().query(postLogEntryDataQuery, postLogEntryDataValues)
       .catch((ex) => log.error('Begin query could not succeed. Cause: ' + ex));
- 
+
     database.getClient().query(postFileQuery, postFileValues)
       .catch((ex) => log.error('Begin query could not succeed. Cause: ' + ex));
 
@@ -52,7 +56,7 @@ describe('Database', () => {
       method: 'GET',
       url: '/api/:logEntryId',
       params: {
-        logEntryId: 1
+        logEntryId: 2
       }
     });
 
@@ -117,6 +121,25 @@ describe('Database', () => {
       }
     });
 
+    mockEvilFileRequest = mocks.createRequest({
+      method: 'POST',
+      url: '/:logEntryId/file',
+      params: {
+        logEntryId: 1
+      },
+      file: {
+        fieldName: 'file',
+        originalName: 'evilFile.sh',
+        encoding: 'UTF-8',
+        mimetype: '',
+        size: '256kb',
+        destination: 'upload/',
+        filename: 'aaq234awf354',
+        path: 'upload/',
+        buffer: 'asdfadsf'
+      }
+    });
+
     mockBadFiledownloadRequest = mocks.createRequest({
       method: 'POST',
       url: '/:logEntryId/file',
@@ -139,7 +162,7 @@ describe('Database', () => {
       url: '/api/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))',
       params: {
         runId: 2,
-        subsystem: 'DAQ' 
+        subsystem: 'DAQ'
       }
     });
   });
@@ -154,20 +177,10 @@ describe('Database', () => {
   it('should be able to retrieve a file from the database', (done) => {
     const file = new logEntry.LogEntries(mockFiledownloadRequest);
     file.getLogEntryFile((result) => {
-      console.log(result)
-        expect(result).to.not.be.null;
-        expect(result).to.have.a.property('file_path');
-        done();
-      });
+      expect(result).to.not.be.null;
+      expect(result).to.have.a.property('file_path');
+      done();
     });
-
-  it('should be able to retrieve a single entry', (done) => {
-    const single = new logEntry.LogEntries(mockSingleLogEntryRequest);
-    single.getLogEntry((result) => {
-      expect(result[0]).to.not.be.null;
-      expect(result[0]).to.have.a.property('created');
-    }).catch((err) => log.error(err));
-    done();
   });
 
   it('should be able to add a log entry into the system', (done) => {
@@ -175,20 +188,28 @@ describe('Database', () => {
     postEntry.postLogEntry((result) => {
       expect(result[0]).to.not.be.null;
       expect(result[0]).to.have.a.property('log_entry_id');
+      done();
     }).catch((ex) => log.error(ex));
-    done();
   });
 
-   it('should display an error when a user tries to retrieve a file from a log entry that does not have a file', (done) => {
+  it('should be able to retrieve a single entry', (done) => {
+    const single = new logEntry.LogEntries(mockSingleLogEntryRequest);
+    single.getLogEntry((result) => {
+      expect(result[0]).to.not.be.null;
+      expect(result[0]).to.have.a.property('created');
+      done();
+    }).catch(() => done());
+  });
+
+  it('should display an error when a user tries to' +
+    'retrieve a file from a log entry that does not have a file', (done) => {
     const file = new logEntry.LogEntries(mockBadFiledownloadRequest);
-    file.getLogEntryFile((result) => {
+    file.getLogEntryFile(() => {
     }).catch((ex) => {
-      console.log(ex);
       expect(ex).not.to.be.null;
       done();
-    })
+    });
   });
-
 
   it('should display an error when fields for the creation of a log entry are missing', (done) => {
     const postEntry = new logEntry.LogEntries(mockBadPostRequest);
@@ -196,16 +217,16 @@ describe('Database', () => {
       expect(result[0]).to.not.be.null;
     }).catch((ex) => {
       expect(ex).to.not.be.null;
+      done();
     });
-    done();
   });
 
   it('should not let a SQL injection happen.', (done) => {
     const postEntry = new logEntry.LogEntries(mockInjectionPostRequest);
     postEntry.postLogEntry((result) => {
       expect(result[0]).to.not.be.null;
+      done();
     }).catch((ex) => log.error(ex));
-    done();
   });
 
   it('should allow a user to login', (done) => {
@@ -219,7 +240,7 @@ describe('Database', () => {
 
   it('should not let a user login if the email or password do not match', (done) => {
     const login = new user.User(mockBadUserLoginRequest);
-    login.postUserAuthentication((result) => {
+    login.postUserAuthentication(() => {
     }).catch((ex) => {
       expect(ex).not.to.be.null;
       done();
@@ -231,14 +252,37 @@ describe('Database', () => {
     getFile.getLogEntryFile((result) => {
       expect(result).not.to.be.null;
       done();
-    }).catch((ex) => Log.error(ex));
+    }).catch((ex) => log.error(ex));
   });
-  
-  //This test as last!
+
+  it('should be possible to add a file', (done) => {
+    const postFile = new logEntry.LogEntries(mockEvilFileRequest);
+    postFile.postFileEntry((result) => {
+      expect(result).not.to.be.null;
+      done();
+    }).catch((ex) => log.error(ex));
+  });
+
+  it('should be able to view a corrupted file message from the file download', (done) => {
+    const testFileQuery = 'INSERT INTO test.file_paths(file_path, log_entry_id) values' +
+      '($1, $2)';
+    const testFileValues = ['error with uploading the file.', '2'];
+    database.getClient().query(testFileQuery, testFileValues).then(() => {
+    }).catch((e) => log.error(e));
+    const getFile = new logEntry.LogEntries(mockBadFiledownloadRequest);
+    getFile.getLogEntryFile(() => {
+    }).catch((ex) => {
+      log.error(ex);
+      expect(ex).not.to.be.null;
+      done();
+    });
+  });
+
+  // This test as last!
   it('should display an error message that there are no entries in the system', (done) => {
     database.getClient().query('DELETE FROM test.log_entry');
     const getEntries = new logEntry.LogEntries(mockGetEntriesRequest);
-    getEntries.getEntries((result) => {
+    getEntries.getEntries(() => {
     }).catch((ex) => {
       expect(ex).not.to.be.null;
       expect(ex).to.include(404);
@@ -249,6 +293,7 @@ describe('Database', () => {
   after(() => {
     database.getClient().query('ALTER USER '
       +'cernfrederick SET SEARCH_PATH TO public').catch((ex) => {
-      log.error('Database could not be closed. Cause: ' + ex)});
+      log.error('Database could not be closed. Cause: ' + ex);
+    });
   });
 });

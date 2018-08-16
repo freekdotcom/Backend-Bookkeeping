@@ -9,7 +9,7 @@
   'use strict';
   const Database = require('./../database.js').Database;
   const database = Database.getInstance();
-  const {JwtToken, Log} = require('@aliceo2/web-ui');
+  const {JwtToken} = require('@aliceo2/web-ui');
   const Config = require('./../configuration_files/Config.js').Config;
   const config = Config.getInstance();
   const jwt = new JwtToken(config.getJsonWebTokenConfiguration());
@@ -58,7 +58,6 @@
             }
           });
         }).catch((err) => {
-          Log.error('Internal failure. Cause: ' + err);
           reject('Internal failure. Cause: ' + err, 500);
         });
       });

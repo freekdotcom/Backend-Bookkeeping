@@ -54,8 +54,8 @@
 
     /**
      * Function to retrieve a single file from the database
-     * @param  {Function} callback [description]
-     * @return {[type]}            [description]
+     * @param  {Function} callback
+     * @return {string}            The file path
      */
     getLogEntryFile(callback) {
       let result = null;
@@ -81,8 +81,8 @@
     /**
      * Retrieves log entries based upon the run and either the subsystem,
      * author or the type of log entry
-     * @param  {Function} callback Returns the log entry
-     * @return {[type]}            [description]
+     * @param  {Function} callback
+     * @return {array}   array of log entries
      */
     getEntries(callback) {
       let results = null;
@@ -108,8 +108,8 @@
 
     /**
      * Inserts the log entry into the database
-     * @param  {Function} callback [description]
-     * @return {[type]}            [description]
+     * @param  {Function} callback
+     * @return {JSON}            The id of the newly created log entry
      */
     async postLogEntry(callback) {
       let result = null;
@@ -139,8 +139,8 @@
 
     /**
      * Adds the file path to the database.
-     * @param  {Function} callback [description]
-     * @return {[type]}            [description]
+     * @param  {Function} callback
+     * @return {string}  returns success message
      */
     async postFileEntry(callback) {
       let result = null;

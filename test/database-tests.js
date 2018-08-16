@@ -26,6 +26,7 @@ let mockFiledownloadRequest;
 let mockEvilFileRequest;
 let mockBadFiledownloadRequest;
 let mockGetEntriesRequest;
+let mockBadWrittenLoginRequest;
 
 describe('Database', () => {
   before(() => {
@@ -165,6 +166,15 @@ describe('Database', () => {
         subsystem: 'DAQ'
       }
     });
+
+    mockBadWrittenLoginRequest = mocks.createRequest({
+      method: 'POST',
+      url: '/api/login',
+      body: {
+        email: 'Walter.white@cern.ch',
+        password: 'pAssWorD'
+      }
+    });
   });
 
   it('the singleton database is connected by executing a simple query', (done) => {
@@ -251,14 +261,16 @@ describe('Database', () => {
     const getFile = new logEntry.LogEntries(mockFiledownloadRequest);
     getFile.getLogEntryFile((result) => {
       expect(result).not.to.be.null;
+      expect(result.file_path).to.equal('upload/undefined/MVCProblem.pdf');
       done();
     }).catch((ex) => log.error(ex));
   });
 
-  it('should be possible to add a file', (done) => {
+  it('should be possible to upload a file to the database', (done) => {
     const postFile = new logEntry.LogEntries(mockEvilFileRequest);
     postFile.postFileEntry((result) => {
       expect(result).not.to.be.null;
+      expect(result).to.equal('Filepath has been added to the database');
       done();
     }).catch((ex) => log.error(ex));
   });
@@ -272,7 +284,15 @@ describe('Database', () => {
     const getFile = new logEntry.LogEntries(mockBadFiledownloadRequest);
     getFile.getLogEntryFile(() => {
     }).catch((ex) => {
-      log.error(ex);
+      expect(ex).not.to.be.null;
+      done();
+    });
+  });
+
+  it('should not allow a password that is badly written', (done) => {
+    const userLogin = new user.User(mockBadWrittenLoginRequest);
+    userLogin.postUserAuthentication(() => {
+    }).catch((ex) =>{
       expect(ex).not.to.be.null;
       done();
     });
@@ -295,5 +315,6 @@ describe('Database', () => {
       +'cernfrederick SET SEARCH_PATH TO public').catch((ex) => {
       log.error('Database could not be closed. Cause: ' + ex);
     });
+    database.getClient().end();
   });
 });

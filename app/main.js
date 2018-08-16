@@ -13,7 +13,7 @@
   const config = Config.getInstance();
   const logEntry = require('./models/log_entries');
   const user = require('./models/users');
-  const regex = /'^.*\.(jpg|JPG|gif|GIF|doc|DOC|pdf|PDF)$'/;
+  const regex = /^(.*\.(?!(gif|GIF|png|PNG|jpeg|JPEG|txt|TXT|doc|DOC)$))?[^.]*$/i;
   const fs = require('fs');
 
   /**
@@ -35,7 +35,8 @@
     res.send(resArray);
   }
 
-  // Checks if the server is not being run in root, and if it is run in root,
+  // Checks if the server is not being run in root,
+  // and if it is run in root,
   // changes the UID of the process.
   const uId = parseInt(process.env.SUDO_UID);
   if (uId) {
@@ -48,6 +49,8 @@
   let httpServer = new HttpServer(config.getServerConfiguration(),
     config.getJsonWebTokenConfiguration());
 
+  // Retrieves log entries based upon run id and a second parameter
+  // The second parameter could be user, subsystem or type of log entry
   httpServer.get('/run/:runId/((s/:subsystem)|(u/:user)|(t/:type))', (req, res) => {
     Object.keys(req.params)
       .forEach((key) => req.params[key] === undefined && delete req.params[key]);
@@ -59,6 +62,7 @@
     });
   });
 
+  // Retrieves a file from a log entry
   httpServer.get('/:logEntryId/file', (req, res) => {
     const file = new logEntry.LogEntries(req);
     file.getLogEntryFile((result) => {
@@ -73,7 +77,7 @@
     });
   });
 
-  // Gets a single entry from the database
+  // Gets a single entry from the database based upon ID
   httpServer.get('/:logEntryId', (req, res) => {
     const single = new logEntry.LogEntries(req);
     single.getLogEntry((result) => {
@@ -83,7 +87,7 @@
     });
   });
 
-  // Posts an entry with all the data
+  // Creates a log entry and then adds it to the database.
   httpServer.post('/run/:runId/:subsystem/:class/:user', (req, res) => {
     const post = new logEntry.LogEntries(req);
     post.postLogEntry((result) => {
@@ -95,8 +99,7 @@
 
 
   // Test if the file is allowed to be uploaded and uploads
-  // the file if the file is allowed. TODO, set this in the
-  // configuration?
+  // the file if the file is allowed.
   httpServer.post('/:logEntryId/upload', (req, res) => {
     if (regex.test(req.file.originalname)) {
       fs.unlinkSync(req.file.path);
